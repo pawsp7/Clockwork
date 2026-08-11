@@ -192,12 +192,12 @@ export function drawTown(ctx, state, t, hover) {
   text(ctx, 'PARTY', 40, 330, P.inkDim, 10, true);
   const party = activeParty(state);
   party.forEach((c, i) => {
-    drawSprite(ctx, c.id, 40 + i * 90, 350, 2.2, {
+    drawSprite(ctx, c.id, 40 + i * 100, 340, 2.6, {
       eyepatch: state.flags.aliceEyepatch,
       shortHair: state.flags.aliceShortHair,
     });
-    text(ctx, c.name, 40 + i * 90, 460, P.inkDim, 11);
-    text(ctx, `${c.hp}/${c.maxHp}`, 40 + i * 90, 478, P.hpFill, 11);
+    text(ctx, c.name, 40 + i * 100, 468, P.inkDim, 11);
+    text(ctx, `${c.hp}/${c.maxHp}`, 40 + i * 100, 486, P.hpFill, 11);
   });
 
   if (state.townMsg) {
