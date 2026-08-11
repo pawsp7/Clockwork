@@ -385,27 +385,28 @@ export function resolveRound(state) {
   } else {
     c.phase = 'select';
     c.selectedAction = null;
-    c.selectedFront = null;
+    c.selectedFront = activeParty(state)[0]?.id || c.selectedFront;
   }
 }
 
 function advanceTutorialIntents(c) {
   c._tutorialStep = (c._tutorialStep || 0) + 1;
   const step = c._tutorialStep;
-  // after first resolve: one attacking, one ? 
-  // Doc: next round one attacking — block that. Other moves to block.
+  // Doc beats: idle+attack → attack+block → block+unknown → one blocking thereafter
   if (step === 1) {
     if (c.enemies[0]) c.enemies[0].nextIntent = 'attack';
     if (c.enemies[1]) c.enemies[1].nextIntent = 'block';
   } else if (step === 2) {
     if (c.enemies[0]) c.enemies[0].nextIntent = 'block';
-    if (c.enemies[1]) c.enemies[1].nextIntent = Math.random() < 0.5 ? 'attack' : 'idle';
+    if (c.enemies[1]) c.enemies[1].nextIntent = 'attack';
   } else {
-    for (const e of c.enemies) {
-      if (!e.alive) continue;
-      e.nextIntent = e.nextIntent === 'block' ? 'block' : INTENTS[Math.floor(Math.random() * 3)];
-      // "indicating one is blocking until player wins"
-      if (c.enemies[0]?.alive) c.enemies[0].nextIntent = 'block';
+    // Keep exactly one blocker so the other remains a valid damage target
+    const alive = c.enemies.filter((e) => e.alive);
+    if (alive.length >= 2) {
+      alive[0].nextIntent = 'block';
+      alive[1].nextIntent = step % 2 === 0 ? 'attack' : 'idle';
+    } else if (alive[0]) {
+      alive[0].nextIntent = 'attack';
     }
   }
 }
