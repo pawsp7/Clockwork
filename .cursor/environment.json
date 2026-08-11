@@ -1,0 +1,20 @@
+{
+  "name": "Clockwork",
+  "install": "npm ci",
+  "terminals": [
+    {
+      "name": "server",
+      "command": "npm run dev:server",
+      "description": "Clockwork API (Express + tsx watch) on http://localhost:4000."
+    },
+    {
+      "name": "web",
+      "command": "npm run dev:web",
+      "description": "Clockwork web app (Vite dev server) on http://localhost:5173. Proxies /api to the server."
+    }
+  ],
+  "ports": [
+    { "name": "web", "port": 5173 },
+    { "name": "api", "port": 4000 }
+  ]
+}
