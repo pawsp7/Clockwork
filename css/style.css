@@ -1,0 +1,93 @@
+:root {
+  --bg-deep: #0c0a0e;
+  --bg-panel: #16121a;
+  --bg-raised: #1e1824;
+  --ink: #c4b8b0;
+  --ink-dim: #7a6e68;
+  --ink-faint: #4a4240;
+  --accent-alice: #9a6a78;
+  --accent-mitzi: #6a5a7a;
+  --accent-victoria: #7a3a3a;
+  --accent-hestia: #a8a090;
+  --accent-charon: #6a5040;
+  --danger: #8a3030;
+  --good: #4a6a50;
+  --frame: #2a2228;
+  --gold-dim: #8a7050;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  background:
+    radial-gradient(ellipse at 50% 20%, #1a1218 0%, transparent 55%),
+    linear-gradient(180deg, #0e0a10 0%, #08060a 100%);
+  color: var(--ink);
+  font-family: "IBM Plex Sans", sans-serif;
+  overflow: hidden;
+}
+
+#app {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  position: relative;
+}
+
+#game {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  max-width: min(96vw, 1280px);
+  max-height: 92vh;
+  width: auto;
+  height: auto;
+  border: 2px solid var(--frame);
+  box-shadow:
+    0 0 0 1px #000,
+    0 24px 80px rgba(0, 0, 0, 0.65),
+    inset 0 0 60px rgba(20, 10, 16, 0.4);
+  background: #000;
+  cursor: default;
+}
+
+#ui-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  display: none;
+}
+
+button, .btn {
+  font-family: "Press Start 2P", monospace;
+  font-size: 8px;
+  letter-spacing: 0.04em;
+  background: var(--bg-raised);
+  color: var(--ink);
+  border: 1px solid var(--ink-faint);
+  padding: 10px 14px;
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s, color 0.12s;
+}
+
+button:hover, .btn:hover {
+  background: #2a2230;
+  border-color: var(--gold-dim);
+  color: #e0d4cc;
+}
+
+button:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.pixel-title {
+  font-family: "Press Start 2P", monospace;
+  text-transform: uppercase;
+}
