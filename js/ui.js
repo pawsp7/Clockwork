@@ -61,15 +61,16 @@ export function drawTitle(ctx, t, hover) {
     ctx.fillStyle = 'rgba(140,120,110,0.15)';
     ctx.fillRect(x, y, 2, 2);
   }
-  text(ctx, 'CLOCKWORK', W / 2 - 140, 120, P.ink, 28, true);
-  text(ctx, 'a dim tale of Gehenna', W / 2 - 90, 170, P.inkDim, 16);
-  drawPortrait(ctx, 'alice', 80, 210, 5, {});
-  drawPortrait(ctx, 'mitzi', 220, 220, 4.5, {});
-  drawPortrait(ctx, 'victoria', 360, 210, 5, {});
-  drawPortrait(ctx, 'hestia', 560, 210, 5, {});
-  drawPortrait(ctx, 'charon', 720, 220, 4.5, {});
+  text(ctx, 'CLOCKWORK', W / 2 - 140, 100, P.ink, 28, true);
+  text(ctx, 'a dim tale of Gehenna', W / 2 - 90, 150, P.inkDim, 16);
+  // dialog-style portraits on title
+  drawPortrait(ctx, 'alice', 40, 180, 3.2, {});
+  drawPortrait(ctx, 'mitzi', 200, 185, 3.0, {});
+  drawPortrait(ctx, 'victoria', 360, 180, 3.2, {});
+  drawPortrait(ctx, 'hestia', 540, 180, 3.2, {});
+  drawPortrait(ctx, 'charon', 720, 185, 3.0, {});
 
-  const btn = { x: W / 2 - 100, y: 420, w: 200, h: 44, id: 'start' };
+  const btn = { x: W / 2 - 100, y: 430, w: 200, h: 44, id: 'start' };
   drawButton(ctx, btn, 'Begin Descent', hover === 'start');
   text(ctx, 'Arrows/click · Enter to confirm', W / 2 - 110, 480, P.inkFaint, 12);
   return [btn];
