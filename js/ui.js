@@ -63,11 +63,11 @@ export function drawTitle(ctx, t, hover) {
   }
   text(ctx, 'CLOCKWORK', W / 2 - 140, 120, P.ink, 28, true);
   text(ctx, 'a dim tale of Gehenna', W / 2 - 90, 170, P.inkDim, 16);
-  drawPortrait(ctx, 'alice', 70, 200, 5, {});
-  drawPortrait(ctx, 'mitzi', 200, 210, 4.5, {});
-  drawPortrait(ctx, 'victoria', 320, 200, 5, {});
-  drawPortrait(ctx, 'hestia', 560, 200, 5, {});
-  drawPortrait(ctx, 'charon', 700, 210, 4.5, {});
+  drawPortrait(ctx, 'alice', 80, 210, 5, {});
+  drawPortrait(ctx, 'mitzi', 220, 220, 4.5, {});
+  drawPortrait(ctx, 'victoria', 360, 210, 5, {});
+  drawPortrait(ctx, 'hestia', 560, 210, 5, {});
+  drawPortrait(ctx, 'charon', 720, 220, 4.5, {});
 
   const btn = { x: W / 2 - 100, y: 420, w: 200, h: 44, id: 'start' };
   drawButton(ctx, btn, 'Begin Descent', hover === 'start');
@@ -96,7 +96,7 @@ export function drawDialog(ctx, state, t, hover) {
 
   const speaker = node.speaker === 'narrator' ? null : node.speaker;
   if (speaker) {
-    drawPortrait(ctx, speaker, 40, 80, 6, {
+    drawPortrait(ctx, speaker, 48, 60, 5, {
       angry: node.angry,
       eyepatch: state.flags.aliceEyepatch && speaker === 'alice',
       shortHair: state.flags.aliceShortHair && speaker === 'alice',
