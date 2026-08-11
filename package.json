@@ -1,0 +1,22 @@
+{
+  "name": "clockwork",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Clockwork — a world-clock and stopwatch dashboard (Express API + React/Vite web).",
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "concurrently -n server,web -c blue,green \"npm:dev:server\" \"npm:dev:web\"",
+    "dev:server": "npm run dev -w @clockwork/server",
+    "dev:web": "npm run dev -w @clockwork/web",
+    "build": "npm run build -w @clockwork/server && npm run build -w @clockwork/web",
+    "typecheck": "npm run typecheck -w @clockwork/server && npm run typecheck -w @clockwork/web"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
