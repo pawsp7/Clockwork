@@ -333,13 +333,13 @@ export function drawCombat(ctx, state, t, hover) {
       ctx.fillStyle = 'rgba(138,112,80,0.25)';
       ctx.fillRect(x - 4, y - 4, 70, 100);
     }
-    drawSprite(ctx, p.id, x, y, 2.4, {
+    drawSprite(ctx, p.id, x, y, 2.8, {
       eyepatch: state.flags.aliceEyepatch,
       shortHair: state.flags.aliceShortHair,
       angry: p.id === 'hestia' && state.flags.hestiaSuspicion > 1,
     });
-    text(ctx, p.name, x, y + 110, selected ? P.gold : P.ink, 11);
-    text(ctx, `${p.hp}/${p.maxHp}`, x, y + 126, P.hpFill, 11);
+    text(ctx, p.name, x, y + 130, selected ? P.gold : P.ink, 11);
+    text(ctx, `${p.hp}/${p.maxHp}`, x, y + 146, P.hpFill, 11);
   });
 
   const boxes = [];
