@@ -44,7 +44,7 @@ export function startCombat(state, opts) {
     tutorial,
     turn: 1,
     phase: 'select', // select | resolve | won | lost
-    selectedFront: null,
+    selectedFront: activeParty(state)[0]?.id || 'alice',
     selectedAction: null, // attack | block | study | item
     studyTarget: null,
     visionTarget: 0, // which enemy Alice sees

@@ -87,7 +87,12 @@ window.addEventListener('keydown', (e) => {
     e.preventDefault();
     if (state.scene === 'title') handleAction({ id: 'start' });
     else if (state.scene === 'dialog' && !state.dialog?.awaitingChoice) handleAction({ id: 'dialog_advance' });
-    else if (state.scene === 'combat' && state.combat?.phase !== 'select') handleAction({ id: 'combat_continue' });
+    else if (state.scene === 'combat' && state.combat?.phase === 'select') {
+      const c = state.combat;
+      if (c.selectedFront && c.selectedAction && (c.selectedAction !== 'study' || c.studyTarget != null)) {
+        handleAction({ id: 'resolve' });
+      }
+    } else if (state.scene === 'combat' && state.combat?.phase !== 'select') handleAction({ id: 'combat_continue' });
   }
   if (state.scene === 'dialog' && state.dialog?.awaitingChoice) {
     const n = parseInt(e.key, 10);

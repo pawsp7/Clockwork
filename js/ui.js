@@ -353,7 +353,7 @@ export function drawCombat(ctx, state, t, hover) {
   });
 
   if (c.phase === 'select') {
-    panel(ctx, 24, 360, W - 48, 160);
+    panel(ctx, 24, 360, W - 48, 170);
     text(ctx, '1) Choose frontline  2) Choose action', 40, 372, P.inkDim, 12);
     party.forEach((p, i) => {
       const b = { x: 40 + i * 120, y: 400, w: 110, h: 32, id: `front_${p.id}` };
@@ -380,9 +380,14 @@ export function drawCombat(ctx, state, t, hover) {
       });
     }
     if (c.selectedFront && c.selectedAction && (c.selectedAction !== 'study' || c.studyTarget != null)) {
-      const go = { x: W - 180, y: 448, w: 120, h: 40, id: 'resolve' };
-      drawButton(ctx, go, 'Commit', hover === 'resolve');
+      const go = { x: W / 2 - 90, y: 488, w: 180, h: 40, id: 'resolve' };
+      // brighten ready state
+      ctx.fillStyle = P.gold;
+      ctx.fillRect(go.x - 2, go.y - 2, go.w + 4, go.h + 4);
+      drawButton(ctx, go, 'COMMIT ▶', hover === 'resolve');
       boxes.push(go);
+    } else {
+      text(ctx, 'Select frontline + action, then COMMIT', 40, 500, P.inkFaint, 12);
     }
   } else if (c.phase === 'won' || c.phase === 'lost') {
     panel(ctx, 200, 160, W - 400, 200);
