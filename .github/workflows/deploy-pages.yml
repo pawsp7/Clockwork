@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -15,33 +15,52 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  deploy:
+  # Always publish a clean static tree to the gh-pages branch (works once
+  # Settings → Pages → Deploy from branch → gh-pages is selected).
+  publish-branch:
     runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build static bundle
+        run: |
+          mkdir -p _site
+          cp -r index.html package.json README.md css js .nojekyll _site/
+          touch _site/.nojekyll
+
+      - name: Publish to gh-pages branch
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./_site
+          force_orphan: true
+          commit_message: "Deploy Clockwork static site"
+
+  # Also try Actions-based Pages (succeeds after Pages source is set to GitHub Actions).
+  deploy-actions:
+    runs-on: ubuntu-latest
+    needs: publish-branch
+    continue-on-error: true
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
         with:
           enablement: true
 
-      - name: Prepare site bundle
+      - name: Build static bundle
         run: |
           mkdir -p _site
-          # Ship only the playable static game (no workflows / git metadata)
           cp -r index.html package.json README.md css js .nojekyll _site/
-          # Keep an empty marker so Pages serves from artifact root
           touch _site/.nojekyll
 
-      - name: Upload static site
-        uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v3
         with:
           path: _site
 
-      - name: Deploy
-        id: deployment
+      - id: deployment
         uses: actions/deploy-pages@v4
