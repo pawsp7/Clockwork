@@ -26,11 +26,21 @@ jobs:
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
+        with:
+          enablement: true
+
+      - name: Prepare site bundle
+        run: |
+          mkdir -p _site
+          # Ship only the playable static game (no workflows / git metadata)
+          cp -r index.html package.json README.md css js .nojekyll _site/
+          # Keep an empty marker so Pages serves from artifact root
+          touch _site/.nojekyll
 
       - name: Upload static site
         uses: actions/upload-pages-artifact@v3
         with:
-          path: .
+          path: _site
 
       - name: Deploy
         id: deployment
