@@ -97,7 +97,7 @@ export function drawDialog(ctx, state, t, hover) {
 
   const speaker = node.speaker === 'narrator' ? null : node.speaker;
   if (speaker) {
-    drawPortrait(ctx, speaker, 48, 60, 5, {
+    drawPortrait(ctx, speaker, 36, 40, 4.2, {
       angry: node.angry,
       eyepatch: state.flags.aliceEyepatch && speaker === 'alice',
       shortHair: state.flags.aliceShortHair && speaker === 'alice',

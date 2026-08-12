@@ -6,13 +6,16 @@ Alice falls below with a pocket watch that can glimpse one enemy intention. Sist
 
 ## Play
 
-Open `index.html` in a browser, or serve locally:
+**GitHub Pages:** [https://pawsp7.github.io/Clockwork/](https://pawsp7.github.io/Clockwork/)
+
+Or run locally:
 
 ```bash
-npx --yes serve -p 4173 .
+npm start
+# → http://localhost:4173
 ```
 
-Then visit `http://localhost:4173`.
+Open `index.html` via a static server (ES modules need HTTP, not `file://`).
 
 ## Features
 
@@ -22,10 +25,16 @@ Then visit `http://localhost:4173`.
 - Monster **notebook** (eye / shape / limbs) for inference
 - Town hubs: Inn, Pub (mercenaries, mingle, bargain), Smithy, Clinic
 - Dialog trees that alter Mitzi's study unlock & damage, Victoria's assist/interfere, Hestia's boss boost, and endings
-- Character arcs for Alice, Mitzi, Victoria, Hestia, and Charon
+- Detailed dialog portraits + lineless vacant-eyed chibi overworld sprites
 
 ## Controls
 
 - Mouse click UI buttons
-- Enter / Space advances dialog
+- Enter / Space advances dialog and commits combat turns
 - Number keys 1–9 select dialog choices when shown
+
+## Tests
+
+```bash
+npm test
+```
