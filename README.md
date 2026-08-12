@@ -8,6 +8,12 @@ Alice falls below with a pocket watch that can glimpse one enemy intention. Sist
 
 **GitHub Pages:** [https://pawsp7.github.io/Clockwork/](https://pawsp7.github.io/Clockwork/)
 
+One-time setup (repo owner): **Settings → Pages → Build and deployment → Source:**
+- **Deploy from a branch** → Branch `gh-pages` / folder `/` → Save  
+  (or choose **GitHub Actions** and re-run the Deploy workflow)
+
+Pushes to `main` refresh the `gh-pages` site automatically.
+
 Or run locally:
 
 ```bash
