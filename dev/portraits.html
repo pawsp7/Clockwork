@@ -1,0 +1,15 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><style>body{margin:0;background:#16121a}canvas{image-rendering:pixelated}</style></head>
+<body><canvas id="c" width="1400" height="820"></canvas>
+<script type="module">
+import { portrait } from '../js/art/portraits.js';
+import { blit } from '../js/art/pixel.js';
+const ctx = document.getElementById('c').getContext('2d');
+ctx.fillStyle = '#2a2230'; ctx.fillRect(0,0,1400,820);
+const list = [
+  ['alice', {}, null], ['alice', {}, 'happy'], ['alice', {shortHair:true}, 'shock'], ['alice', {shortHair:true, eyepatch:true}, null], ['alice', {}, 'sad'],
+  ['mitzi', {}, null], ['mitzi', {}, 'happy'], ['mitzi', {}, 'sad'], ['victoria', {}, null], ['victoria', {}, 'angry'],
+  ['hestia', {}, null], ['hestia', {}, 'happy'], ['hestia', {}, 'angry'], ['charon', {}, null], ['thug', {}, null],
+];
+list.forEach(([w, f, m], i) => blit(ctx, portrait(w, f, m), 100 + (i % 5) * 270, 260 + Math.floor(i/5)*270, 5));
+</script></body></html>
