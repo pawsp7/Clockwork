@@ -1,0 +1,16 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><style>body{margin:0;background:#16121a}canvas{image-rendering:pixelated}</style></head>
+<body><canvas id="c" width="1200" height="700"></canvas>
+<script type="module">
+import { heroSprite, thugSprite, mercSprite } from '../js/art/sprites.js';
+import { blit } from '../js/art/pixel.js';
+const ctx = document.getElementById('c').getContext('2d');
+ctx.fillStyle = '#2a2230'; ctx.fillRect(0,0,1200,700);
+const list = [
+  heroSprite('alice', {}), heroSprite('alice', {shortHair:true}), heroSprite('alice', {shortHair:true, eyepatch:true}),
+  heroSprite('mitzi'), heroSprite('victoria'), heroSprite('hestia'), heroSprite('hestia', {}, 'angry'), heroSprite('charon'),
+  thugSprite('lanky'), thugSprite('knife'), mercSprite({template:'x', look:'monk', tint:'#5a4a36'}),
+];
+list.forEach((img, i) => blit(ctx, img, 70 + (i % 8) * 140, 220 + Math.floor(i/8)*260, 5));
+window.__ready = true;
+</script></body></html>

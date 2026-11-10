@@ -1,0 +1,21 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><style>body{margin:0;background:#16121a}canvas{image-rendering:pixelated}</style></head>
+<body><canvas id="c" width="1400" height="900"></canvas>
+<script type="module">
+import { monsterArt, bossArt, faithfulArt } from '../js/art/creatures.js';
+import { MONSTERS } from '../js/data/monsters.js';
+import { blit } from '../js/art/pixel.js';
+const ctx = document.getElementById('c').getContext('2d');
+ctx.fillStyle = '#2a2230'; ctx.fillRect(0,0,1400,900);
+const K = (a,b,c) => ({eye:a,shape:b,limbs:c});
+// knowledge progression on one monster
+const m = MONSTERS[5];
+const states = [K(0,0,0), K(1,0,0), K(1,1,0), K(1,1,1)];
+states.forEach((k,i)=> blit(ctx, monsterArt({...m, known:k, identified:i===3, seen:{profile:i===3}}), 70+i*130, 150, 3));
+// 12 identified samples
+MONSTERS.slice(0,18).forEach((mm,i)=> blit(ctx, monsterArt({...mm, known:K(1,1,1), identified:true, seen:{profile:true}}, i%2), 70+(i%9)*140, 330+Math.floor(i/9)*150, 3));
+['hollow_stag','cinder_maw','gatewarden','reliquary'].forEach((b,i)=> blit(ctx, bossArt(b, 0), 120+i*250, 860, 3));
+blit(ctx, bossArt('white_ox', 0, {open:false}), 1150, 300, 3);
+blit(ctx, bossArt('white_ox', 1, {open:true}), 1150, 600, 3);
+blit(ctx, faithfulArt(0), 700, 150, 3);
+</script></body></html>

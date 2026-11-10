@@ -1,10 +1,13 @@
 {
   "name": "clockwork",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "private": true,
   "type": "module",
+  "description": "Clockwork — a dim pixel-art RPG set in Gehenna.",
   "scripts": {
     "start": "npx --yes serve -p 4173 .",
-    "test": "node js/smoke_test.js"
+    "test": "node --test tests/logic.test.js",
+    "sim": "node tests/sim.js 20 good",
+    "balance": "node tests/battles.js 10"
   }
 }
