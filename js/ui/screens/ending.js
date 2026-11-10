@@ -164,6 +164,7 @@ export const gameOverScreen = {
     app.ui.replaceChildren(
       h(
         'div.ending-title',
+        { style: { paddingTop: '90px' } },
         h('h1', info.title),
         h('div', { style: { margin: '16px 0 24px', maxWidth: '560px' } }, info.lines.map((l) => h('p.dim', { style: { fontSize: '18px', lineHeight: 1.5 } }, l))),
         h(
@@ -180,7 +181,7 @@ export const gameOverScreen = {
     ctx.fillRect(0, 0, SW, SH);
     // a stopped watch
     ctx.save();
-    ctx.translate(480, 120);
+    ctx.translate(480, 96);
     ctx.strokeStyle = '#8a7046';
     ctx.lineWidth = 4;
     ctx.beginPath();

@@ -84,8 +84,8 @@ export const combatScreen = {
     const list = this.c.enemies;
     const alive = list.filter((e) => e.alive || this.anim[e.uid]?.dying);
     const n = alive.length;
-    const span = Math.min(330, 120 * (n - 1));
-    const x0 = 720 - span / 2;
+    const span = Math.min(370, 132 * (n - 1));
+    const x0 = 712 - span / 2;
     return alive.map((e, i) => ({ e, x: Math.round(x0 + (n > 1 ? (span / (n - 1)) * i : 0)), y: FEET + (i % 2 ? 6 : 0) }));
   },
 
