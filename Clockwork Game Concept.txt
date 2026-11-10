@@ -1,0 +1,224 @@
+Clockwork
+Stopwatch
+Clock work
+
+Alice - Pink
+Mitzi/Eris (strife and discourse) - Purple
+Victoria/Ophelia - Red|Loss of innocence 
+Hestia - White
+Charon - Brown
+
+Hestia becomes the ultimate villain
+Cow/Ox spirit
+Beaten by the heros in the good ending
+Opens eyes at the very end - nod to immortality/eternal god
+Overly religious behaviour demonstrated by Hestia is a foreshadow to worshipping the Bull
+When she's angry her eyes turn red - generally tries to hide the and only lets it happen when she's alone plotting
+Hestia is a high ranking demon known as the White Ox. She believes anyone who has entered the underground doesn't deserve a chance into heaven because they already screwed up their chance on earth. She goes about and attempts to mess with visitors and lead them into their sins. She urges them to convert to the White Ox religion and settle down in the underground city. Once they join her religion she drains their energy at each mass. They are aware of the reduced energy they have but brush it aside because following the religion offers them an easier answer to life rather than dealing with their sins. They become submissive and act on an autopilot behaviour, afraid or too comfortable to break the status quo.
+
+Red hair (Victoria) and purple hair (Mitzi) are siblings. Regular residents of the underground. Used to live above ground but came under supposedly after their parents died. All their memories of surviving and living amongst the underground city were actually from above ground. Mitzi was killed in her sleep in an alleyway when they were attacked by thugs. Victoria attempted to fight back but she was bested. She was stabbed and left to bleed out she died holding Mitzi and they were sent to the underground. They don't advance to sky because they can't overcome their greatest flaw. Veronica's is her inability to live her life for herself and in turn holding Mitzi back from being her own person too. Mitzi's flaw is her sloth, selfishness and unwillingness to break away from her sister. She is fine depending on her sister and doesn't see an issue because it makes life easier for her. She doesn't consider the impact it has on her sister and jokes about her drinking issues while ignoring how seriously they affect Victoria. 
+
+Victoria has a drinking problem. She cares deeply for her sister Mitzi but puts the entire burden of taking care of Mitzi on herself. Overwhelming on Mitzi and doesn't give her any freedom leaving her stunted on knowing basic things required to take care of oneself, cuz Victoria always does it. Victoria's only time to herself in when Mitzi is asleep and she drinks it away to hide the stress. Claims her parents died young and Mitzi doesn't remember them so she wants to be the best parental figure she can be. 
+
+Mitzi is very carefree and never does anything to take care of herself. She expects and demands things from others but is rarely willing to help back in turn. She'll joke it off and then run away. She has a sweet heart and will always listen to others issues and offer advise but never goes beyond that. She's friendly and hosts many gatherings in hopes of looking good infront of others. 
+
+Underground = metaphor for hell/afterlife 
+
+Alice found an old pocket watch in the above world and one day it opened and everything around her distorted. She found herself in the underground and her watch transformed into a weapon (wand or whip) capable of manipulating time. She wants to make it back to her world. Along the way she ends up cutting her hair after getting half of it singed in a volcano area/fire. She suffers an eye injury which leaves her needing a eyepatch. Injury from Hestia misleading her to the wrong place and Alice almost dying from a booby trap. She defeats Hestia in the good end but in turn sacrifices her own life. She ends up moving onto heaven alone. Alice is a nod to Alice in Wonderland for the clock motif 
+
+Charon is a demon and permanent resident of the underground. She acts as a doctor. She uses unconventional methods and is rather eccentric. She will bluntly tell others they're in hell and everyone is dead. That she can't wait to see who goes into heaven. No one takes her seriously. She offers them advise on their quests and answers any questions about the underground. She knows who Hestia truly is. She collects coins as a nod to Charon the ferryman of souls. 
+
+GAMEPLAY:
+Small Town - called Gehenna?
+Milk is the main export 
+Most people are very religious 
+Locations:
+-Inn-
+    Rest & recover 
+    Restores health and progresses story
+-Pub-
+    Recruit mercenaries
+    Pick up odd quests 
+-Smithy-
+    Buy/craft new equipment 
+    Crafting may add elemental attributes to weapons and/or change the attack type
+-Clinic-
+    Buy healing items 
+
+STORY ROADMAP
+-Tutorial-
+    Alice vs 2 enemies
+She can tell one will be idle so she decides to attack that one. Other attacks her supplies - introduces payload stamina and loss condition. Next round she can see one will be attacking. Chooses to block that attacker. The other moves to block so she's glad she didn't waste her energy attacking. Next she sees one will be blocking. She can't tell what the other is doing so allows player to decide to block or attack. If block, the enemy attacks and no damage gets through. If attack, both exchange damage to each other. Battle continues indicating one is blocking until player wins. 
+-Dead Woods-
+    1st dungeon
+    Mitzi refusing to participate. Dialog tree affects when Mitzi learns the ability to study the enemies and learn their characteristics. If all wrong options are chosen she learns during the boss battle. Minimum 3-5 battles before she can learn. 
+-Volcano-
+    2nd dungeon
+    Mitzi partakes by Alice encouragement. Her damage is reduced or increased based on dialog options. Whatever it is at by the end of the dungeon it stays at for rest of the game.
+    Alice singed hair
+-Abandoned Fort-
+    3rd dungeon
+    Victoria stepping infront of Mitzi when she tries to do an action - prompts Alice to interact through dialog options. Response determines if Victoria stops and contributes to final ending. If all wrong answers are chosen Victoria continues to butt in the rest of the game. Perfect answers she does not butt in but unlocks a random chance assist to partially block incoming damage to Mitzi. Any other answer level Victoria doesn't involve herself at all.
+-Ruins-
+    4th dungeon
+    Hestia joins party. Dialog options decide if Alice is suspicious of her or not. Bad answers lead to Hestia's attack boosted during boss battle. Perfect answers lead to Alice and party having higher defense. All dialog paths will lead to Hestia gradually listening less and less to player commands. Hestia directs Alice to investigate a certain room that is booby trapped.
+    Alice eye injury 
+-Manor-
+    Finale 
+    Last night at inn is a chance to 'redeem' any failed dialog trees with a replacement one. Option for player to talk to Victoria, Mitzi (chance for their good endings), Charon (increases chance for Alice good end her whole point is she trolls people and tells them they're underground) or Hestia (very difficult, heavy random chance to gain lost boost or neutralize Hetias boost)
+    Vs The White Ox - boosts based on Ruin dialog. Dialog post battle is last possible factor towards ending. 
+
+COMBAT:
+Alices ability allows her to see one of her enemies future moves. Player chooses which character is pushed to the front to take the hit and deal damage.
+At first player can only see one move of one enemy. The type of attack (blunt, slashing, piercing) or attribute isn't recognizable. As player progress they unlock the ability for Mitzi? to identity the type of attack and magic. This aids choosing who to attack and block. 
+
+Whenever an enemy or character uses a specific element they become weak to the element strong against that for the next turn. 
+Each character can block one enemy unless otherwise stated. 
+Enemies may be unblocked but will then deal damage to the payload/supply
+
+PAYLOAD DAMAGE IS APPLIED 1 AT A TIME UNLESS ABILITY USED 
+RESOURCES CONSUMED X1 PER PARTY MEMEBER EACH BATTLE AND SCREEN CHANGE 
+START AT 100 TO SIMULATE
+
+ storage. If this health reaches zero the party falls and the game is over. If all characters die the game is also over. 
+Each character is innately weak and resistant to one attack/element (using character exclusive equipment). With different weapons/equipment they may change their resistances and weaknesses. Mercenaries for hire are available at the tavern for varying prices. Some offer free trial runs but another quest must be completed during their trial period or they will take all the half of the parties items and money. (randomly decided but weighed based on rarity) The more a specific mercenary is used the more they level up and become more powerful. With this their price also increases. Player may 'mingle' to randomize pub patrons. Players may 'bargin' with mercenaries if they wish to pay a lower price but this runs the risk of the mercenary turning their back during the mission and running with the money/some items. Elements are accessible through gems on bracelets. Each characters begins with one gem and a bracelet with a single slot. By end game bracelets for all characters with 4 slots are obtainable but difficult. Expected 1 3-slot and 2-2-slot bracelets. If wearing respective gem may embune weapon with that attribute or choose to attack neutrally. Using the bracelets expends Mana. Mana only regens during rest periods.
+Simplified combat calculations 
+Attack directly to HP (defense doesn't exist) attack is reduced or increased by resistances and weaknesses OR Defense subtracted from attack and the weak/resist modifiers applied 
+
+Encounter 1-4 enemies per battle
+Avg 8 battles per dungeon
+20 mons per dungeon (including repeats)
+4 dungeons 
+80 mons seen for a run with no side quests
+36 Unique mons in game each with 3 identifiable features 
+
+All enemies are shadowed until identified 
+Must exert a characters turn action to 'see' a creature. Can write down a new featured noticed and recognize any existing ones
+3 identifying features
+Eye colour 
+Body shape 
+Amount of limbs
+All together you can identify element and attack type 
+With each unique characteristic you'll see any creature with that feature and notes of every element/attack type anything with that traits has done. If two traits anything with both those traits also applies.
+Can only learn one feature of a single enemy each encounter
+
+Eg. 3 mons
+1 turn to see mon 1
+Mon 1 has 2 limbs 
+Mon 1 uses electric piercing attack
+Notebook gains "2 limbed monsters may use Electric Piercing attacks"
+Eg. 3 mons
+Notebook that says 2L E.P., 2L W.P, 2L WeakFire, Green E.P, Green ResistP, Blue G.B, Circle E.P  Circle F.S
+1 turn to see mon 1
+Recognize 2L and Green, note Circle
+Mon 1 is 2LGreenCircle all notes on those shapes include E.P. attack will be E.P. and therefore weakness with be Ground. Green eyes means it may also resist Piercing but not confirmed.
+
+Enemies
+Eyes - Green, Red, Blue, Yellow
+Shape - Triangle, Square, Circle
+Limbs - 2, 4, 6
+36 different enemies?
+Doesn't need to be every combo probably best for very different ones with little overlap. See example at bottom, identifying B2 becomes uncertain 
+
+Attack types
+• Slashing
+- Sword
+- Knife
+• Piercing
+- Bow & Arrow
+- Spear
+• Blunt
+- Hammer
+- Fists
+Elements 
+• Fire
+• Electric
+• Earth
+• Water
+Water -> Fire
+Earth -> Electric
+Electric -> Water
+Fire -> Earth
+Water -> Fire -> Earth -> Electric -> Water
+
+Character Stats
+Out of 10 for reference. Aiming for these stats to work in a simulated battle as is. HP range from 20-40
+DX = Dungeon #
+10 is end boss only
+6-9 is boss level 6D1 7D2 8D3 9D4
+1-2 is D1 avg/comparable 
+2-3 is D2 avg
+3-4 is D3 avg
+4-5 is D4 avg
+Stats based on relative power and how well that Stat scales as well as when it caps. Enemies are significantly lower because there is many of them and player characters should not be game ending. 
+B = Blunt, P = Piercing, S = Slashing
+DxD = Dungeon x Dialog dependent 
+Resistances/weaknesses can be add/subtract 25%, 50% or 75%
+
+Alice
+HP 40
+Attack 2
+Weapon: Alice's Pocket Watch (BPS) different upgrade paths change attack style. With no upgrades it extend into a sword for Slashing dmg.
+Elemental Gem: Electric 
+Armour:
+Alices Frilly Collar: R.E W.W
+Moon Hairpiece: R.S W.P (no flavour just balance)
+Unique: If using Alices Pocket Watch +50% attack (must be regularly upgraded to stay good)
+
+Mitzi
+HP 20 
+Attack 4-8 (D2D)
+Weapon: Mitzi's Hammer (B)
+Elemental Gem: Water
+Armour: 
+Mitzi's Fur Coat: Resist Water, Weak Fire (Flavour: It's water resistant but easy to burn)
+Purple Rose:  Resist P, Weak B (Flavour: Doesn't care about her sister as much as she should (she favors P weapons) is her own worst enemy (favors B weapons)
+Unique: +20% attack dmg with hammers
+
+Victoria
+HP 30
+Attack 5
+Weapon: Victoria's Spear (P)
+Elemental Gem: Fire
+Armour: 
+Victoria's Black Shawl: R. Fire W.Earth
+Red Rose: R.B W.S (F: Restrains her sister constantly. Weak to things she doesn't know (type her and her sister don't favour)
+Unique: +20% when using a Spear
+
+Hestia
+HP 35
+Attack 7
+Weapon: Hestia's Cross (? Randomized each attack)
+Element: Earth
+Armour:
+Unique: stats randomized each encounter between 6-9, hidden from player 
+
+Hestia Boss
+HP 10
+Attack 8 OR 10
+Defense 7
+Weapon: Ox Horns (BPS, depends on attack used)
+Elemental Gem: All
+Armour: Ox Wings (Resists all but degrades by 10% resist each turn)
+Cow Bells (Chance to change a characters action, uses up turns action)
+
+Eyes - Blue Red
+Limbs - 1 2
+
+B1 - E.P. Weak P
+B2 - F.S Weak B
+R1 - W.B Weak P
+R2 - E.S Weak P
+
+Notes would look like
+B - E.P, F.S, Weak P, Weak B
+R - W.B, E.S, Weak P
+1 - E.P, W.B. Weak P
+2 - F.S, E.S, Weak B, Weak P
+
+Using only the chart what is a B2
+
+F.S Weak P/B
+
+Looking at R you can tell it can be Weak P so it must be F.S Weak B
+But that's kinda more effort
