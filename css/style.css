@@ -1404,21 +1404,23 @@ body {
 
 .ending-card {
   position: absolute;
-  left: 50%;
-  bottom: 40px;
-  transform: translateX(-50%);
-  width: 700px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 26px 140px 22px;
   text-align: center;
+  background: linear-gradient(rgba(6, 4, 8, 0), rgba(6, 4, 8, 0.82) 22%, rgba(6, 4, 8, 0.92));
 }
 .ending-card h2 {
   font-family: var(--display);
   font-weight: 400;
-  font-size: 46px;
-  margin-bottom: 8px;
+  font-size: 42px;
+  line-height: 1;
+  margin-bottom: 6px;
 }
 .ending-card p {
-  font-size: 19px;
-  line-height: 1.5;
+  font-size: 17px;
+  line-height: 1.45;
   color: #e4d8ce;
   text-shadow: 0 2px 0 #000;
   opacity: 0;

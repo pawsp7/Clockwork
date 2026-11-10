@@ -24,8 +24,8 @@ const ART = {
 function standing(ctx, t, list, flags, dim) {
   for (const c of list) {
     ctx.fillStyle = 'rgba(0,0,0,0.4)';
-    ctx.fillRect(c.x - 36, 402, 72, 8);
-    blit(ctx, heroSprite(c.id, flags), c.x, 404 + Math.round(Math.sin(t / 700)) * 2, 4, dim ? { tint: { color: '#0a0810', amount: dim }, key: `end${c.id}` } : {});
+    ctx.fillRect(c.x - 36, 252, 72, 8);
+    blit(ctx, heroSprite(c.id, flags), c.x, 254 + Math.round(Math.sin(t / 700)) * 2, 4, dim ? { tint: { color: '#0a0810', amount: dim }, key: `end${c.id}` } : {});
   }
 }
 
@@ -38,23 +38,23 @@ function ascend(ctx, t, p, list, flags) {
   ctx.fillRect(0, 0, SW, SH);
   for (let i = 0; i < 7; i++) {
     ctx.fillStyle = `rgba(255,250,236,${0.05 + 0.03 * Math.sin(t / 600 + i)})`;
-    ctx.fillRect(380 + i * 30 - 20, 0, 18, 420);
+    ctx.fillRect(380 + i * 30 - 20, 0, 18, 270);
   }
   for (const c of list) {
-    const rise = Math.min(1, p * 1.2) * 120;
-    blit(ctx, heroSprite(c.id, flags), c.x, 404 - rise + Math.round(Math.sin(t / 500)) * 3, 4, { alpha: 1 - p * 0.35, flash: 0.15 + p * 0.3, key: `asc${c.id}` });
+    const rise = Math.min(1, p * 1.2) * 90;
+    blit(ctx, heroSprite(c.id, flags), c.x, 254 - rise + Math.round(Math.sin(t / 500)) * 3, 4, { alpha: 1 - p * 0.35, flash: 0.15 + p * 0.3, key: `asc${c.id}` });
   }
 }
 
 function flock(ctx, t, flags) {
-  for (let i = 0; i < 5; i++) blit(ctx, faithfulArt(Math.floor(t / 600 + i) % 2), 200 + i * 140, 410, 3, { alpha: 0.85 });
-  blit(ctx, heroSprite('alice', flags), 480, 420, 3, { tint: { color: '#e8e2da', amount: 0.4 }, key: 'flockalice' });
+  for (let i = 0; i < 5; i++) blit(ctx, faithfulArt(Math.floor(t / 600 + i) % 2), 200 + i * 140, 260, 3, { alpha: 0.85 });
+  blit(ctx, heroSprite('alice', flags), 480, 270, 3, { tint: { color: '#e8e2da', amount: 0.4 }, key: 'flockalice' });
 }
 
 function coin(ctx, t, flags) {
   standing(ctx, t, [{ id: 'charon', x: 480 }], flags, 0);
   const p = (t % 1600) / 1600;
-  const y = 230 - Math.sin(p * Math.PI) * 90;
+  const y = 100 - Math.sin(p * Math.PI) * 70;
   ctx.fillStyle = '#e8cc70';
   const w = Math.abs(Math.cos(t / 90)) * 12 + 2;
   ctx.fillRect(500 - w / 2, y, w, 12);
@@ -66,13 +66,13 @@ function oxEyes(ctx, t, p) {
   const open = p > 0.45;
   const glow = open ? Math.min(1, (p - 0.45) * 3) : 0;
   if (glow) {
-    const g = ctx.createRadialGradient(480, 220, 10, 480, 220, 260);
+    const g = ctx.createRadialGradient(480, 160, 10, 480, 160, 260);
     g.addColorStop(0, `rgba(200,40,40,${0.25 * glow})`);
     g.addColorStop(1, 'rgba(200,40,40,0)');
     ctx.fillStyle = g;
     ctx.fillRect(0, 0, SW, SH);
   }
-  blit(ctx, bossArt('white_ox', Math.floor(t / 700) % 2, { open }), 480, 430, 4, { alpha: 0.35 + p * 0.65 });
+  blit(ctx, bossArt('white_ox', Math.floor(t / 700) % 2, { open }), 480, 330, 3, { alpha: 0.35 + p * 0.65 });
 }
 
 export const endingScreen = {

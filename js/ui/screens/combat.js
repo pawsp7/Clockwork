@@ -507,9 +507,13 @@ export const combatScreen = {
     const c = this.c;
     const top = FEET - this.foeHeight(e);
     const name = e.identified ? e.name : '? ? ?';
+    // big things carry their name tag beside them, clear of the HUD
+    const big = this.foeHeight(e) > 200;
+    const cardX = big ? x - (e.bossId === 'white_ox' ? 190 : 150) : x;
+    const cardTop = big ? top + 64 : top - 34;
     const card = h(
       'div.foe',
-      { style: { left: `${x}px`, top: `${top - 34}px` } },
+      { style: { left: `${cardX}px`, top: `${cardTop}px` } },
       h(`div.name${e.identified ? '' : '.unknown'}`, name),
       bar(e.hp, e.maxHp),
     );
@@ -544,7 +548,7 @@ export const combatScreen = {
     // intent / vision
     if (!e.alive || c.phase !== 'plan') return;
     const view = intentView(s, e);
-    const intentEl = h('div.intent', { style: { left: `${x}px`, top: `${top - 40}px` } });
+    const intentEl = h('div.intent', { style: { left: `${cardX}px`, top: `${big ? cardTop - 6 : top - 40}px` } });
     if (view.visible) {
       const info = INTENT_INFO[view.intent];
       const prof = view.profile;
@@ -812,6 +816,11 @@ export const combatScreen = {
     const cartA = this.anim.cart;
     const cartShake = cartA && now - cartA.t0 < 300 ? Math.round(Math.sin((now - cartA.t0) / 20) * 4) : 0;
     drawCart(ctx, 78 + cartShake, FEET + 2, s.supplies / RULES.supplyMax);
+    ctx.font = '13px "Pixelify Sans", monospace';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    ctx.fillStyle = s.supplies < 25 ? '#ff9a8a' : '#c8bca8';
+    ctx.fillText(`supplies ${s.supplies}`, 78, FEET + 10);
 
     // plan lines
     if (c.phase === 'plan' && !this.playing) this.drawPlanLines(ctx, t);

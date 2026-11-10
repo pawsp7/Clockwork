@@ -76,7 +76,8 @@ function bestiary(s) {
   for (const m of MONSTERS) {
     const st = nb.species[m.id];
     const known = st === 'identified';
-    const art = monsterArt({ ...m, known: known ? null : { eye: false, shape: !!st, limbs: false }, identified: known, seen: { profile: known } });
+    const learned = (nb.known || {})[m.id] || {};
+    const art = monsterArt({ ...m, known: known ? null : { eye: !!learned.eye, shape: !!learned.shape, limbs: !!learned.limbs }, identified: known, seen: { profile: known } });
     const cell = h(
       `div.beast${st ? '' : '.unknown'}`,
       { title: known ? `${m.name} — ${SHORT[m.element]}.${SHORT[m.type]} · weak ${LABEL[m.weak]}${m.resist ? ' · resists ' + LABEL[m.resist] : ''}` : st ? 'Seen, not identified' : 'Not yet encountered' },

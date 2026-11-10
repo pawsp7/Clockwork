@@ -380,14 +380,16 @@ function volcano(r) {
       [262, 70],
       [340, 200],
     ],
-    '#241210',
+    null,
+    (x, y) => (dither(x, y, Math.max(0, 0.55 - (y - 70) / 200)) ? '#4a2216' : '#2e1610'),
   );
-  r.rect(228, 66, 34, 6, '#ff8a3a');
+  r.ellipse(245, 71, 17, 3, '#ff9a4a');
+  r.ellipse(245, 71, 12, 2, '#ffd070');
   softGlow(r, 245, 66, 40, '#ff6a2a', 0.5);
   for (let i = 0; i < 30; i++) r.set(232 + ((i * 7) % 26), 72 + i * 4, dither(i, i, 0.5) ? '#c84a1e' : '#8a2a14');
   ridge(r, 170, 40, 0.012, '#1e100e', 92);
   // lava falls
-  for (const x of [90, 390]) {
+  for (const x of [24, 250]) {
     for (let y = 110; y < 212; y++) {
       const w = 4 + Math.floor((y - 110) / 30);
       for (let i = -w; i <= w; i++) {
@@ -488,10 +490,11 @@ function manor(r) {
       r.rect(x + i + sway, 10, 1, 180 - Math.abs(25 - i) * 2, i % 6 < 3 ? '#e8e2da' : '#c8c0b8');
     }
   }
-  // altar
-  r.rect(200, 170, 80, 40, '#e8e2da');
-  r.rect(196, 166, 88, 6, '#f4f0ea');
-  r.rect(204, 176, 72, 2, '#c8a858');
+  // altar, set back behind where the Ox rises
+  r.rect(316, 148, 80, 30, '#d8d2ca');
+  r.rect(312, 144, 88, 6, '#ece8e2');
+  r.rect(320, 154, 72, 2, '#c8a858');
+  r.rect(316, 178, 80, 3, '#a8a098');
   // ox window
   r.ellipse(240, 80, 30, 36, '#3a3036');
   r.ellipse(240, 80, 26, 32, '#5a4a50');
@@ -601,10 +604,10 @@ const SCENES = {
     ],
   },
   woods: { paint: woods, particles: 'fireflies', lights: [], ground: 214 },
-  volcano: { paint: volcano, particles: 'embers', lights: [{ x: 120, y: 200, r: 50, color: '#ff7030', flicker: 0.3 }, { x: 330, y: 200, r: 50, color: '#ff7030', flicker: 0.3 }], ground: 214 },
+  volcano: { paint: volcano, particles: 'embers', lights: [{ x: 24, y: 200, r: 50, color: '#ff7030', flicker: 0.3 }, { x: 250, y: 200, r: 50, color: '#ff7030', flicker: 0.3 }, { x: 245, y: 66, r: 40, color: '#ff8a3a', flicker: 0.2 }], ground: 214 },
   fort: { paint: fort, particles: 'dust', lights: [{ x: 100, y: 150, r: 30, color: '#ffb060', flicker: 0.4 }, { x: 380, y: 150, r: 30, color: '#ffb060', flicker: 0.4 }], ground: 214 },
   ruins: { paint: ruins, particles: 'motes', lights: [{ x: 250, y: 96, r: 60, color: '#6a7ac8', flicker: 0.15 }], ground: 214 },
-  manor: { paint: manor, particles: 'feathers', lights: [{ x: 210, y: 160, r: 24, color: '#ffe8c0', flicker: 0.35 }, { x: 270, y: 160, r: 24, color: '#ffe8c0', flicker: 0.35 }, { x: 240, y: 80, r: 50, color: '#f0e0d0', flicker: 0.1 }], ground: 214 },
+  manor: { paint: manor, particles: 'feathers', lights: [{ x: 326, y: 136, r: 24, color: '#ffe8c0', flicker: 0.35 }, { x: 386, y: 136, r: 24, color: '#ffe8c0', flicker: 0.35 }, { x: 240, y: 80, r: 50, color: '#f0e0d0', flicker: 0.1 }], ground: 214 },
   inn_night: { paint: innNight, particles: 'dust', lights: [{ x: 202, y: 158, r: 40, color: '#ffd090', flicker: 0.4 }], ground: 214 },
   pub: { paint: pub, particles: 'dust', lights: [{ x: 170, y: 40, r: 50, color: '#ffc070', flicker: 0.2 }, { x: 395, y: 130, r: 26, color: '#ffc070', flicker: 0.3 }], ground: 214 },
   church: { paint: church, particles: 'embers', lights: [{ x: 240, y: 70, r: 50, color: '#c03030', flicker: 0.3 }], ground: 214 },
