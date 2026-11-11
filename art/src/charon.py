@@ -103,7 +103,8 @@ fig.poly(bob, lambda x, y: hair_col(x, y, 0.5))
 def coat_col(x, y):
     t = 0.62 - (x - 20) / 110 + 0.1 * math.sin(x * 0.35 + y * 0.1)
     return ramp(x, y, t, COAT)
-fig.poly([(6, 96), (10, 82), (22, 74), (36, 70), (60, 70), (74, 74), (86, 82), (90, 96)], coat_col)
+from bust import SHOULDERS
+fig.poly(SHOULDERS, coat_col)
 fig.poly([(34, 60), (41, 64), (42, 78), (36, 80), (30, 72)], lambda x, y: COAT[3] if x < 37 else COAT[2])
 fig.poly([(62, 60), (55, 64), (54, 78), (60, 80), (66, 72)], lambda x, y: COAT[1] if x > 59 else COAT[2])
 # collar edges: dark seam inside, lamplit rim on top

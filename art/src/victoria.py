@@ -73,7 +73,8 @@ fig.poly([(23, 37), (73, 37), (77, 96), (19, 96)], lambda x, y: hair(x, y, 0.3))
 fig.poly([(32, 50), (64, 50), (66, 80), (30, 80)], lambda x, y: back_hair(x, y))
 
 # bare shoulders, black lace bodice
-fig.poly([(10, 96), (14, 84), (26, 77), (40, 74), (56, 74), (70, 77), (82, 84), (86, 96)],
+from bust import SHOULDERS
+fig.poly(SHOULDERS,
          lambda x, y: SKIN[1] if x > 66 else SKIN[0])
 def lace_col(x, y):
     c = ramp(x, y, 0.6 - (x - 30) / 80, LACE)

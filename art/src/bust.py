@@ -6,6 +6,12 @@ W = H = 96
 CX = 48
 
 
+# One shoulder line for the whole cast: narrow and softly sloping, so the
+# head and eyes lead (cute anime proportions) and the five portraits match.
+SHOULDERS = [(CX - 30, 96), (CX - 28, 88), (CX - 24, 81), (CX - 17, 76), (CX - 9, 73),
+             (CX + 9, 73), (CX + 17, 76), (CX + 24, 81), (CX + 28, 88), (CX + 30, 96)]
+
+
 def face_hw(y, top_w=14.4, jaw=42, bottom=61):
     """Half-width of the face: round and a little short, the cute anime way.
     Full cheeks just below the eyes, then the lower face is close to a half

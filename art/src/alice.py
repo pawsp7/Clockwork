@@ -84,9 +84,10 @@ for y in range(30, H):
 def blouse_col(x, y):
     t = 0.75 - (x - 30) / 100 + 0.12 * math.sin(x * 0.5 + y * 0.2)
     return ramp(x, y, t, BLOUSE)
-fig.poly([(14, 96), (18, 82), (28, 74), (40, 71), (56, 71), (68, 74), (78, 82), (82, 96)], blouse_col)
+from bust import SHOULDERS
+fig.poly(SHOULDERS, blouse_col)
 for side in (-1, 1):   # puffed sleeves
-    fig.ellipse(CX + side * 26, 84, 10, 9, lambda x, y, nx, ny: ramp(x, y, 0.8 - nx * 0.3 - ny * 0.4, BLOUSE))
+    fig.ellipse(CX + side * 23, 86, 7.5, 8, lambda x, y, nx, ny: ramp(x, y, 0.8 - nx * 0.3 - ny * 0.4, BLOUSE))
 neck(fig, SKIN)
 for side in (-1, 1):   # little rounded collar
     fig.ellipse(CX + side * 5, 74, 7, 4, lambda x, y, nx, ny: BLOUSE[0] if ny > 0.5 else BLOUSE[3])

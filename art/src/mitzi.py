@@ -84,7 +84,8 @@ for y in range(34, H):
 # grey hoodie, frilly white collar, drawstrings
 def hood_col(x, y):
     return ramp(x, y, 0.7 - (x - 24) / 90 + 0.1 * math.sin(x * 0.45 + y * 0.15), HOOD)
-fig.poly([(12, 96), (16, 82), (28, 75), (40, 72), (56, 72), (68, 75), (80, 82), (84, 96)], hood_col)
+from bust import SHOULDERS
+fig.poly(SHOULDERS, hood_col)
 neck(fig, SKIN)
 for i, x in enumerate(range(34, 63, 3)):        # ruffled collar
     fig.ellipse(x + 1, 76 + (1 if i % 2 else 0), 3.2, 3.6,

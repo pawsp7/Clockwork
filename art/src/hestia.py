@@ -109,7 +109,8 @@ fig.poly([(23, 36), (74, 36), (77, 96), (19, 96)], lambda x, y: hair_col(x, y, 0
 def dress_col(x, y):
     t = 0.55 - (x - 30) / 90 + 0.12 * math.sin(x * 0.4)
     return ramp(x, y, t * 0.9, DRESS)
-fig.poly([(10, 96), (14, 84), (24, 76), (38, 72), (58, 72), (72, 76), (82, 84), (86, 96)], dress_col)
+from bust import SHOULDERS
+fig.poly(SHOULDERS, dress_col)
 
 # neck
 fig.poly([(44, 56), (52, 56), (53, 70), (55, 74), (41, 74), (43, 70)],
