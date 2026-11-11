@@ -2,6 +2,7 @@ import { app } from '../app.js';
 import { h, btn, clear } from '../dom.js';
 import { drawScene, vignette, SW, SH } from '../../art/fx.js';
 import { portrait } from '../../art/portraits.js';
+import { drawCg } from '../../art/cgs.js';
 import { blit } from '../../art/pixel.js';
 import { audio } from '../../core/audio.js';
 import { StoryRunner } from '../../game/story.js';
@@ -17,39 +18,37 @@ const NAMES = {
   thug: ['Thug', '#a89a90'],
 };
 const SPEED = { slow: 28, normal: 55, fast: 120, instant: 100000 };
+const BLINK_OFFSET = { alice: 0, mitzi: 1300, victoria: 2600, hestia: 700, charon: 1900, thug: 0 };
 
 export const storyScreen = {
   enter(params) {
-    this.runner =
-      params.runner ||
-      new StoryRunner(app.state, SCENES, params.scene, {
-        bg: (v) => this.setBg(v),
-        music: (v) => audio.music(v),
-        fx: (v) => this.effect(v),
-        cast: () => {},
-      });
-    if (params.runner) {
-      // re-bind hooks after a battle
-      this.runner.hooks.bg = (v) => this.setBg(v);
-      this.runner.hooks.fx = (v) => this.effect(v);
-    }
-    this.bg = this.runner.bg || this.bg || 'town';
+    this.runner = new StoryRunner(app.state, SCENES, params.scene, {
+      bg: (v) => (this.bg = v),
+      music: (v) => audio.music(v),
+      fx: (v) => this.effect(v),
+      cg: (v) => (this.cg = v),
+      cast: () => {},
+    });
+    this.bg = this.bg || 'town';
+    this.cg = null;
     this.step = null;
     this.speaker = null;
     this.mood = null;
+    this.cast = [];
     this.typing = null;
     this.distortUntil = 0;
-    this.log = this.log && params.runner ? this.log : [];
-    this.box = null;
+    this.log = [];
     this.advance();
   },
 
   exit() {
     clearInterval(this.typing?.timer);
+    clearTimeout(this.autoTimer);
   },
 
-  setBg(v) {
-    this.bg = v;
+  /** Saving mid-conversation isn't possible; the menu asks. */
+  canSave() {
+    return false;
   },
 
   effect(v) {
@@ -84,12 +83,7 @@ export const storyScreen = {
       return;
     }
     if (step.type === 'battle') {
-      const runner = this.runner;
-      app.go('combat', {
-        opts: step.opts,
-        story: true,
-        onWin: () => app.go('story', { runner }),
-      });
+      app.go('combat', { opts: { ...step.opts, after: step.after } });
       return;
     }
     if (step.type === 'end') onSceneEnd(step.then);
@@ -110,18 +104,26 @@ export const storyScreen = {
       text,
       h('div.advance', { style: { visibility: 'hidden' } }),
     );
-    const tools = h(
-      'div.dialog-tools',
-      btn('Log', () => this.showLog(), { cls: 'tiny ghost', title: 'Backlog (L)' }),
-    );
-    app.ui.append(box, tools);
-    this.box = box;
+    app.ui.append(box, this.tools());
+    if (this.feedback) {
+      app.ui.append(this.feedback);
+      this.feedback = null;
+    }
     this.type(text, step.text, box.querySelector('.advance'));
+  },
+
+  tools() {
+    return h(
+      'div.dialog-tools',
+      btn(app.settings.autoAdvance ? 'Auto ●' : 'Auto', () => this.toggleAuto(), { cls: `tiny ghost${app.settings.autoAdvance ? ' selected' : ''}`, title: 'Advance lines automatically (A)' }),
+      btn('Log', () => this.showLog(), { cls: 'tiny ghost', title: 'Backlog (L)' }),
+      btn('Menu', () => app.openMenu(), { cls: 'tiny ghost', title: 'Options (Esc)' }),
+    );
   },
 
   nameplate(who) {
     const [name, color] = NAMES[who] || [who, 'var(--ink)'];
-    const left = this.slotOf(who) !== 'right';
+    const left = this.slotOf(who) !== 'right' || this.cg;
     return h(`div.nameplate${left ? '' : '.right'}`, { style: { color } }, name);
   },
 
@@ -138,33 +140,57 @@ export const storyScreen = {
       rest.textContent = '';
       arrow.style.visibility = 'visible';
       this.typing = null;
+      this.scheduleAuto(str);
     };
     if (cps > 1000) return done();
-    const tick = 1000 / cps;
     const timer = setInterval(() => {
       i += 1;
       shown.textContent = str.slice(0, i);
       rest.textContent = str.slice(i);
       if (i % 3 === 0 && str[i] !== ' ') audio.sfx('blip');
       if (i >= str.length) done();
-    }, tick);
+    }, 1000 / cps);
     this.typing = { timer, done };
   },
 
+  scheduleAuto(str) {
+    clearTimeout(this.autoTimer);
+    if (!app.settings.autoAdvance) return;
+    this.autoTimer = setTimeout(() => {
+      if (!app.sheet && this.step?.type === 'line' && !this.typing) this.advance();
+      else if (app.sheet) this.scheduleAuto(str);
+    }, 1400 + str.length * 28);
+  },
+
+  toggleAuto() {
+    app.settings.autoAdvance = !app.settings.autoAdvance;
+    app.saveSettings();
+    app.toast(app.settings.autoAdvance ? 'Dialogue will advance by itself.' : 'Auto-advance off.');
+    const tools = app.ui.querySelector('.dialog-tools');
+    if (tools) tools.replaceWith(this.tools());
+    if (app.settings.autoAdvance && this.step?.type === 'line' && !this.typing) this.scheduleAuto(this.step.text);
+    else clearTimeout(this.autoTimer);
+  },
+
   click() {
+    clearTimeout(this.autoTimer);
     if (this.typing) return this.typing.done();
     audio.sfx('advance');
     this.advance();
   },
 
   showChoice(step) {
-    // keep the last line visible underneath
     const last = this.log[this.log.length - 1];
     if (last) {
       const who = last.who;
       const kind = who === 'narrator' ? 'narrator' : who === 'system' ? 'system' : 'speech';
       app.ui.append(
-        h(`div.panel.dialog${kind !== 'speech' ? '.' + kind : ''}`, { style: { cursor: 'default', opacity: 0.75 } }, kind === 'speech' ? this.nameplate(who) : null, h('div.dialog-text', last.text)),
+        h(
+          `div.panel.dialog${kind !== 'speech' ? '.' + kind : ''}`,
+          { style: { cursor: 'default', opacity: 0.75 } },
+          kind === 'speech' ? this.nameplate(who) : null,
+          h('div.dialog-text', last.text),
+        ),
       );
     }
     const list = h(`div.choices${last ? '' : '.center'}`);
@@ -185,14 +211,29 @@ export const storyScreen = {
         ),
       );
     });
-    app.ui.append(list);
+    list.append(h('div.choice-help', '1–' + step.options.length + ' or ↑ ↓ and Enter'));
+    app.ui.append(list, this.tools());
+    this.choiceFocus = -1;
   },
 
   pick(index) {
     const opt = this.step.options.find((o) => o.index === index);
     if (opt) this.log.push({ who: 'alice', text: `» ${opt.text}` });
-    this.runner.choose(index);
+    const note = this.runner.choose(index);
+    if (note) {
+      const icon = note.tone === 'good' ? '▲' : note.tone === 'bad' ? '▼' : '◆';
+      this.feedback = h(`div.feedback.${note.tone}`, h('span.ic', icon), note.text);
+      audio.sfx(note.tone === 'bad' ? 'deny' : 'note');
+      this.log.push({ who: 'system', text: `${icon} ${note.text}` });
+    }
     this.advance();
+    // a choice that ends the scene still shows its feedback, briefly
+    if (this.feedback && this.step?.type !== 'line') {
+      const fb = this.feedback;
+      this.feedback = null;
+      app.toasts.appendChild(fb);
+      setTimeout(() => fb.remove(), 3200);
+    }
   },
 
   showLog() {
@@ -219,10 +260,14 @@ export const storyScreen = {
   render(ctx, t) {
     const now = performance.now();
     const distort = now < this.distortUntil;
+    if (this.cg) {
+      drawCg(ctx, this.cg, t);
+      if (distort) this.drawDistort(ctx, now);
+      return;
+    }
     drawScene(ctx, this.bg, t, { dim: this.speaker ? 0.12 : 0.28 });
     if (distort) this.drawDistort(ctx, now);
 
-    // portraits
     const cast = (this.cast || []).filter((c) => NAMES[c]);
     let left = null;
     let right = null;
@@ -246,12 +291,11 @@ export const storyScreen = {
       if (!who) continue;
       const active = who === this.speaker;
       const mood = active ? this.mood : null;
-      const img = portrait(who, flags, mood);
+      const blink = (t + (BLINK_OFFSET[who] || 0)) % 4200 < 140;
+      const img = portrait(who, flags, mood, blink);
       if (!img) continue;
       const bob = active ? Math.round(Math.sin(t / 500) * 1) * 2 : 0;
-      ctx.fillStyle = 'rgba(0,0,0,0.3)';
-      ctx.fillRect(x - 100, 396, 200, 6);
-      blit(ctx, img, x, 400 + bob, 5, { flip, alpha: active ? 1 : 0.92, tint: active ? null : { color: '#0c0810', amount: 0.55 }, key: `${who}${mood}` });
+      blit(ctx, img, x, 404 + bob, 4, { flip, alpha: active ? 1 : 0.92, tint: active ? null : { color: '#0c0810', amount: 0.55 }, key: `${who}${mood}${blink}` });
     }
     vignette(ctx, 0.5);
   },
@@ -259,9 +303,8 @@ export const storyScreen = {
   drawDistort(ctx, now) {
     const p = 1 - (this.distortUntil - now) / 1700;
     const img = ctx.getImageData(0, 0, SW, SH);
-    const copy = new ImageData(new Uint8ClampedArray(img.data), SW, SH);
+    const copy = new Uint8ClampedArray(img.data);
     const d = img.data;
-    const s = copy.data;
     const amp = 40 * Math.sin(p * Math.PI);
     for (let y = 0; y < SH; y += 2) {
       const off = Math.round(Math.sin(y * 0.04 + now * 0.01) * amp);
@@ -269,16 +312,17 @@ export const storyScreen = {
         const sx = Math.min(SW - 1, Math.max(0, x + off));
         const si = (y * SW + sx) * 4;
         const di = (y * SW + x) * 4;
-        d[di] = s[si];
-        d[di + 1] = s[si + 1];
-        d[di + 2] = s[si + 2];
-        d[di + 4 * SW] = s[si];
-        d[di + 4 * SW + 1] = s[si + 1];
-        d[di + 4 * SW + 2] = s[si + 2];
+        d[di] = copy[si];
+        d[di + 1] = copy[si + 1];
+        d[di + 2] = copy[si + 2];
+        if (y + 1 < SH) {
+          d[di + 4 * SW] = copy[si];
+          d[di + 4 * SW + 1] = copy[si + 1];
+          d[di + 4 * SW + 2] = copy[si + 2];
+        }
       }
     }
     ctx.putImageData(img, 0, 0);
-    // spinning hands
     ctx.save();
     ctx.globalAlpha = Math.sin(p * Math.PI) * 0.8;
     ctx.strokeStyle = '#f4e8c8';
@@ -298,10 +342,19 @@ export const storyScreen = {
 
   key(e) {
     if (this.step?.type === 'choice') {
+      const buttons = [...app.ui.querySelectorAll('.choice')];
       const n = parseInt(e.key, 10);
       if (n >= 1 && n <= this.step.options.length) {
         e.preventDefault();
         this.pick(this.step.options[n - 1].index);
+      } else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        const d = e.key === 'ArrowDown' ? 1 : -1;
+        this.choiceFocus = (this.choiceFocus + d + buttons.length) % buttons.length;
+        buttons[this.choiceFocus]?.focus();
+      } else if ((e.key === 'Enter' || e.key === ' ') && this.choiceFocus >= 0) {
+        e.preventDefault();
+        this.pick(this.step.options[this.choiceFocus].index);
       }
       return;
     }
@@ -310,6 +363,8 @@ export const storyScreen = {
       if (this.step?.type === 'line') this.click();
     } else if (e.key === 'l' || e.key === 'L') {
       this.showLog();
+    } else if (e.key === 'a' || e.key === 'A') {
+      this.toggleAuto();
     }
   },
 };

@@ -1,5 +1,5 @@
 import { app } from './app.js';
-import { createState, saveGame, loadGame, clone, clearSaves } from '../game/state.js';
+import { createState, saveGame, loadGame, clone, clearSaves, latestSave, migrate } from '../game/state.js';
 import { startExpedition, finishExpedition } from '../game/expedition.js';
 import { refreshQuests, mingle } from '../game/town.js';
 import { computeEnding } from '../game/endings.js';
@@ -13,12 +13,20 @@ export function newGame() {
 }
 
 export function continueGame() {
-  const data = loadGame('auto');
-  if (!data) return newGame();
-  app.state = data.state;
-  app.state.combat = null;
-  // autosaves happen in town and between steps on the trail
-  if (app.state.expedition) return app.go('trail', { arriving: true });
+  const latest = latestSave();
+  if (!latest) return newGame();
+  loadSlot(latest.slot);
+}
+
+/** Load any slot and drop the player back where they saved. */
+export function loadSlot(slot) {
+  const data = loadGame(slot);
+  if (!data) return;
+  app.state = migrate(data.state);
+  const s = app.state;
+  if (s.combat && s.combat.phase === 'plan') return app.go('combat', {});
+  s.combat = null;
+  if (s.expedition) return app.go('trail', { arriving: true });
   toTown();
 }
 

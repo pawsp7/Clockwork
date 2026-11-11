@@ -10,6 +10,10 @@ import { study, infer, recordProfile, identify } from '../js/game/notebook.js';
 import { startExpedition, advance, startBattle } from '../js/game/expedition.js';
 import { hire, mingle, refreshQuests, acceptQuest, reforge } from '../js/game/town.js';
 import { playthrough } from './driver.js';
+import { StoryRunner } from '../js/game/story.js';
+import { migrate } from '../js/game/state.js';
+import { codexEntries, CODEX, CHARON_TOPICS } from '../js/story/lore.js';
+import { openCache } from '../js/game/expedition.js';
 
 test('36 unique monsters, 9 per dungeon, one of each shape/limb pair', () => {
   assert.equal(MONSTERS.length, 36);
@@ -101,6 +105,75 @@ test('notebook narrows a creature down from shared traits (concept example)', ()
   assert.equal(s.notebook.species[e.mid], 'identified');
 });
 
+test('every member keeps 1–4 as Strike/Guard/Item/Wait; Study is 5 for Mitzi', () => {
+  const s = createState();
+  s.roster = ['alice', 'mitzi', 'victoria'];
+  s.notebook.unlocked = true;
+  s.cleared.woods = true;
+  createCombat(s, { kind: 'battle', tier: 1, size: 2 });
+  for (const id of ['alice', 'victoria']) assert.deepEqual(actionsFor(s, s.heroes[id]).map((a) => a.id), ['strike', 'guard', 'item', 'wait']);
+  assert.deepEqual(actionsFor(s, s.heroes.mitzi).map((a) => a.id), ['strike', 'guard', 'item', 'wait', 'study']);
+});
+
+test('dialogue choices report their consequences', () => {
+  const s = createState();
+  const r = new StoryRunner(s, SCENES, 'volcano_enter');
+  let step = r.next();
+  while (step.type !== 'choice') step = r.next();
+  const good = step.options.find((o) => o.good);
+  const note = r.choose(good.index);
+  assert.equal(note.tone, 'good');
+  assert.match(note.text, /strength rises to 7/);
+  const r2 = new StoryRunner(createState(), SCENES, 'fort_enter');
+  let st2 = r2.next();
+  while (st2.type !== 'choice') st2 = r2.next();
+  const bad = st2.options.find((o) => o.good === false);
+  assert.equal(r2.choose(bad.index).tone, 'bad');
+});
+
+test('story battles end their scene and name the scene that follows', () => {
+  for (const [scene, after] of [
+    ['prologue', 'prologue_after'],
+    ['manor', 'manor_after'],
+  ]) {
+    const s = createState();
+    const r = new StoryRunner(s, SCENES, scene);
+    let step = r.next();
+    for (let i = 0; i < 200 && step.type !== 'battle'; i++) step = step.type === 'choice' ? (r.choose(step.options[0].index), r.next()) : r.next();
+    assert.equal(step.type, 'battle');
+    assert.equal(step.after, after);
+    assert.ok(SCENES[after]);
+  }
+});
+
+test('caches hold codex pages, camps tell campfire stories', () => {
+  seed(31);
+  const s = createState();
+  s.roster = ['alice', 'mitzi', 'victoria'];
+  startExpedition(s, 'woods');
+  const node = DUNGEONS.woods.nodes.findIndex((n) => n.type === 'cache');
+  s.expedition.node = node;
+  const loot = openCache(s);
+  assert.equal(loot.page, 'page_drawing');
+  assert.ok(codexEntries(s).some((e) => e.id === 'page_drawing'));
+  for (const d of Object.values(DUNGEONS)) {
+    const camp = d.nodes.find((n) => n.type === 'camp');
+    assert.ok(SCENES[camp.scene], camp.scene);
+    assert.ok(d.nodes.find((n) => n.type === 'cache').page);
+  }
+  assert.ok(CODEX.length >= 25);
+  assert.ok(CHARON_TOPICS.length >= 6);
+});
+
+test('old saves gain new fields when loaded', () => {
+  const s = createState();
+  delete s.lore;
+  delete s.notebook.known;
+  migrate(s);
+  assert.deepEqual(s.lore, { found: [] });
+  assert.deepEqual(s.notebook.known, {});
+});
+
 test('Mitzi refuses to fight in the Dead Woods, studies once taught', () => {
   const s = createState();
   s.roster = ['alice', 'mitzi', 'victoria'];
@@ -162,6 +235,8 @@ for (const policy of ['good', 'bad', 'random']) {
     assert.equal(state.flags.shortHair, true);
     assert.equal(state.flags.eyepatch, true);
     assert.ok(state.flags.mitziStudy);
+    // all four dungeon pages and campfire lore were found along the way
+    for (const id of ['page_drawing', 'page_ledger', 'page_roster', 'page_hymn', 'woods_folk', 'old_faith']) assert.ok(state.lore.found.includes(id), id);
     if (policy === 'good') {
       assert.equal(ending.title, 'Clockwork Sky');
       assert.equal(state.flags.victoriaMode, 'assist');

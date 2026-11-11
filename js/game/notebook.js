@@ -1,4 +1,4 @@
-import { FEATURES, SHORT } from '../data/constants.js';
+import { FEATURES, SHORT, LABEL } from '../data/constants.js';
 import { pick } from '../core/rng.js';
 
 /**
@@ -9,6 +9,11 @@ import { pick } from '../core/rng.js';
 
 export const traitKey = (feature, value) => `${feature}:${value}`;
 export const profileKey = (element, type) => `${element}.${type}`;
+/** 'earth.slashing' → 'Earth Slashing' */
+export const profileLabel = (key) => {
+  const [el, ty] = key.split('.');
+  return `${LABEL[el]} ${LABEL[ty]}`;
+};
 export const profileShort = (key) => {
   const [el, ty] = key.split('.');
   return `${SHORT[el]}.${SHORT[ty]}`;
@@ -47,7 +52,7 @@ export function recordProfile(state, enemy) {
   for (const k of knownTraitKeys(enemy)) {
     if (addUnique(entry(nb, k).profiles, p)) {
       added = true;
-      note(nb, `${k.replace(':', ' ')} → ${profileShort(p)}`);
+      note(nb, `${k.replace(':', ' ')} → ${profileLabel(p)}`);
     }
   }
   return added;

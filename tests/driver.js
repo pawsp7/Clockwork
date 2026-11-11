@@ -169,19 +169,21 @@ export function playScene(state, id, ctx) {
       runner.choose(forced ?? pickChoice(ctx.policy, step.options, ctx.rng));
     } else if (step.type === 'battle') {
       const snapshot = clone(state);
-      createCombat(state, step.opts);
+      const opts = { ...step.opts, after: step.after };
+      createCombat(state, opts);
       let won = fight(state, ctx.combat);
       let retries = 0;
       while (!won && retries < (ctx.maxRetries ?? 5)) {
         ctx.report.defeats.push({ where: step.opts.label, retry: retries });
         Object.assign(state, clone(snapshot));
-        createCombat(state, step.opts);
+        createCombat(state, opts);
         won = fight(state, ctx.combat);
         retries++;
       }
       if (!won) throw new Error(`Could not win story battle ${step.opts.label}`);
       ctx.report.battles.push({ where: step.opts.label, boss: true, story: true, rounds: state.combat.round, hp: livingMembers(state).map((m) => `${m.name}:${m.hp}/${m.maxHp}`).join(' ') });
       state.combat = null;
+      return playScene(state, step.after, ctx);
     } else if (step.type === 'end') {
       return step.then;
     }
@@ -253,6 +255,7 @@ export function playthrough(ctx) {
         }
         if (node.type === 'camp') {
           makeCamp(state);
+          if (node.scene) step(node.scene);
           continue;
         }
         startBattle(state);

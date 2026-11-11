@@ -6,13 +6,15 @@ import { blit } from '../../art/pixel.js';
 import { audio } from '../../core/audio.js';
 import { newGame, continueGame } from '../flow.js';
 import { openSettings, confirmSheet } from '../sheets/settings.js';
+import { openLoad, openControls } from '../sheets/menu.js';
+import { openMemories } from '../sheets/memories.js';
 
 const CAST = [
-  { id: 'victoria', x: 118 },
-  { id: 'mitzi', x: 206 },
-  { id: 'alice', x: 300 },
+  { id: 'victoria', x: 104 },
+  { id: 'mitzi', x: 200 },
+  { id: 'alice', x: 296 },
   { id: 'hestia', x: 664 },
-  { id: 'charon', x: 760 },
+  { id: 'charon', x: 762 },
 ];
 
 export const titleScreen = {
@@ -26,7 +28,9 @@ export const titleScreen = {
         if (has) confirmSheet('Start over?', 'Your saved journey will be lost. The watch does not keep two timelines.', () => newGame(), { yesLabel: 'Start over' });
         else newGame();
       }, { cls: has ? '' : 'primary', key: has ? null : '↵' }),
-      btn('Settings', () => openSettings()),
+      has ? btn('Load', () => openLoad()) : null,
+      btn('Memories', () => openMemories()),
+      h('div.row', btn('Settings', () => openSettings(), { cls: 'grow' }), btn('Controls', () => openControls(), { cls: 'grow' })),
     );
     app.ui.append(
       h('div.title-wrap', h('div.title-logo', 'Clockwork'), h('div.title-sub', 'a dim tale of Gehenna')),
@@ -63,8 +67,8 @@ export const titleScreen = {
       const bob = Math.round(Math.sin(t / 600 + i * 1.3)) * 2;
       // shadow
       ctx.fillStyle = 'rgba(0,0,0,0.35)';
-      ctx.fillRect(c.x - 26, 486, 52, 6);
-      blit(ctx, heroSprite(c.id), c.x, 488 + bob, 3);
+      ctx.fillRect(c.x - 30, 486, 60, 6);
+      blit(ctx, heroSprite(c.id), c.x, 490 + bob, 3);
     });
     vignette(ctx, 0.6);
   },

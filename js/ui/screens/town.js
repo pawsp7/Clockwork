@@ -49,7 +49,7 @@ export const townScreen = {
     app.ui.append(townHud('Gehenna'));
     if (s.objective) app.ui.append(h('div.objective', s.objective));
     const sc = sceneDef('town');
-    for (const hs of sc.hotspots) {
+    sc.hotspots.forEach((hs, idx) => {
       const el = h(
         'button.hotspot',
         {
@@ -62,10 +62,10 @@ export const townScreen = {
           onblur: () => (this.hover = null),
           onclick: () => OPEN[hs.id]?.(() => this.build()),
         },
-        h('span.tag', hs.label, h('small', hs.id === 'inn' && s.pendingRest ? 'Rest — the story continues' : BLURB[hs.id])),
+        h('span.tag', h('span.badge', String(idx + 1)), hs.label, h('small', hs.id === 'inn' && s.pendingRest ? 'Rest — the story continues' : BLURB[hs.id])),
       );
       app.ui.append(el);
-    }
+    });
     // party strip
     const strip = h('div.party-strip');
     for (const m of partyMembers(s)) {
@@ -118,12 +118,12 @@ export const townScreen = {
     people.push({ img: heroSprite('charon'), x: 852, y: 424 });
     const party = partyMembers(s);
     party.forEach((m, i) => {
-      people.push({ img: m.kind === 'merc' ? mercSprite(m) : heroSprite(m.id, s.flags), x: 300 + i * 52, y: 452 + (i % 2) * 6 });
+      people.push({ img: m.kind === 'merc' ? mercSprite(m) : heroSprite(m.id, s.flags), x: 290 + i * 60, y: 456 + (i % 2) * 6 });
     });
     for (const p of people) {
       const bob = Math.round(Math.sin(t / 600 + p.x)) * 2;
       ctx.fillStyle = 'rgba(0,0,0,0.35)';
-      ctx.fillRect(p.x - 20, p.y - 3, 40, 5);
+      ctx.fillRect(p.x - 22, p.y - 3, 44, 5);
       blit(ctx, p.img, p.x, p.y + bob, 2);
     }
     vignette(ctx, 0.5);
@@ -131,7 +131,13 @@ export const townScreen = {
 
   key(e) {
     const k = e.key.toLowerCase();
-    if (k === 'p') openParty(() => this.build());
+    const n = parseInt(e.key, 10);
+    const spots = sceneDef('town').hotspots;
+    if (n >= 1 && n <= spots.length) {
+      e.preventDefault();
+      this.hover = spots[n - 1].id;
+      OPEN[spots[n - 1].id]?.(() => this.build());
+    } else if (k === 'p') openParty(() => this.build());
     else if (k === 'n') openNotebook();
     else if (k === 'm') app.go('map');
   },

@@ -1,4 +1,5 @@
 import { app } from './ui/app.js';
+import { loadArt } from './art/refart.js';
 import { titleScreen } from './ui/screens/title.js';
 import { storyScreen } from './ui/screens/story.js';
 import { townScreen } from './ui/screens/town.js';
@@ -18,11 +19,13 @@ app.register('gameover', gameOverScreen);
 
 async function boot() {
   app.init();
+  const art = loadArt();
   try {
     await Promise.race([document.fonts.ready, new Promise((r) => setTimeout(r, 1500))]);
   } catch {
     /* fonts are a nicety */
   }
+  await art;
   app.go('title', {}, { fade: false });
 }
 

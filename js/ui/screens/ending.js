@@ -24,7 +24,7 @@ const ART = {
 function standing(ctx, t, list, flags, dim) {
   for (const c of list) {
     ctx.fillStyle = 'rgba(0,0,0,0.4)';
-    ctx.fillRect(c.x - 36, 252, 72, 8);
+    ctx.fillRect(c.x - 44, 252, 88, 8);
     blit(ctx, heroSprite(c.id, flags), c.x, 254 + Math.round(Math.sin(t / 700)) * 2, 4, dim ? { tint: { color: '#0a0810', amount: dim }, key: `end${c.id}` } : {});
   }
 }

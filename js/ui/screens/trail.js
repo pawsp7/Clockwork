@@ -33,13 +33,31 @@ export const trailScreen = {
     const d = dungeonOf(app.state);
     audio.music(d.music);
     this.walk = null;
-    this.build();
+    const note = app.state.expedition.note;
+    app.state.expedition.note = null;
+    this.build(note);
+    this.autoTalk();
+  },
+
+  exit() {
+    clearTimeout(this.autoTimer);
+  },
+
+  canSave() {
+    return !this.walk;
+  },
+  saveBlockedReason: 'Wait until the party stops walking.',
+
+  /** Conversations on the trail start by themselves. */
+  autoTalk() {
+    clearTimeout(this.autoTimer);
+    const next = peekNext(app.state);
+    if (next?.type === 'story') this.autoTimer = setTimeout(() => this.go(), 900);
   },
 
   build(note) {
     const s = app.state;
     const d = dungeonOf(s);
-    const ex = s.expedition;
     app.ui.replaceChildren();
     app.ui.append(
       h(
@@ -54,7 +72,7 @@ export const trailScreen = {
     const next = peekNext(s);
     const info = next ? NODE_INFO[next.type] : null;
     const cost = partyMembers(s).length;
-    const costText = !next ? '' : next.type === 'story' ? 'No cost' : next.type === 'battle' || next.type === 'boss' ? `−${cost} to travel, −${cost} to fight` : `−${cost} supplies to travel`;
+    const costText = !next ? '' : next.type === 'story' ? 'Starting…' : next.type === 'battle' || next.type === 'boss' ? `−${cost} to travel, −${cost} to fight` : `−${cost} supplies to travel`;
     const nextBox = h(
       'div.trail-next',
       h('div', h('div.label', 'Next'), h('h3', next ? `${info.icon} ${info.label}` : 'The way home'), h('p', note || (next ? info.text || 'The party has something to say.' : ''))),
@@ -64,12 +82,18 @@ export const trailScreen = {
     if (!s.quests.active.length) quests.append(h('li.faint', 'None taken.'));
     for (const q of s.quests.active) quests.append(h('li', h('b', questProgress(s, q) || ''), ' — ', q.text));
     if (s.hired.some((m) => m.trial)) quests.append(h('li.brass', 'A trial mercenary is watching whether you finish a job.'));
-    const side = h('div.col', { style: { width: '120px', justifyContent: 'flex-end' } }, btn('Party', () => openParty(() => this.build()), { cls: 'small', key: 'P' }), btn('Notebook', () => openNotebook(), { cls: 'small', key: 'N' }));
+    const side = h(
+      'div.col',
+      { style: { width: '120px', justifyContent: 'flex-end' } },
+      btn('Party', () => openParty(() => this.build()), { cls: 'small', key: 'P' }),
+      btn('Notebook', () => openNotebook(), { cls: 'small', key: 'N' }),
+      btn('Menu', () => app.openMenu(), { cls: 'small', key: 'Esc' }),
+    );
     app.ui.append(h('div.panel.trail-panel', nextBox, quests, side));
-    void ex;
   },
 
   go() {
+    clearTimeout(this.autoTimer);
     if (this.walk || app.sheet || app.transitioning) return;
     const s = app.state;
     const from = s.expedition.node;
@@ -100,14 +124,28 @@ export const trailScreen = {
       const bits = [`+${loot.supplies} supplies`, `+${loot.coins} coins`];
       if (loot.materials) bits.push(`+${loot.materials} material`);
       if (loot.gem) bits.push(`a ${loot.gem} gem`);
+      let msg = `You find a forgotten cache: ${bits.join(', ')}.`;
+      if (loot.page) {
+        msg += ' Tucked under the crates: a page for the Codex.';
+        app.toast('New page in the Notebook’s Codex.');
+      }
       saveGame(s, 'auto');
-      return this.build(`You find a forgotten cache: ${bits.join(', ')}.`);
+      this.build(msg);
+      this.autoTalk();
+      return;
     }
     if (node.type === 'camp') {
       const r = makeCamp(s);
       audio.sfx('heal');
+      const note = `The party made camp. Wounds closed a little${r.mana ? `; +${r.mana} mana` : ''}.`;
+      if (node.scene) {
+        s.expedition.note = note;
+        return playScene(node.scene);
+      }
       saveGame(s, 'auto');
-      return this.build(`The party makes camp. Wounds close a little${r.mana ? `; +${r.mana} mana` : ''}.`);
+      this.build(note);
+      this.autoTalk();
+      return;
     }
     this.build();
   },
@@ -178,12 +216,13 @@ export const trailScreen = {
     const party = partyMembers(s);
     const walking = !!this.walk;
     party.forEach((m, i) => {
-      const x = 480 - ((party.length - 1) * 70) / 2 + i * 70;
-      const y = 392 + (i % 2) * 6;
+      const x = 480 - ((party.length - 1) * 84) / 2 + i * 84;
+      const y = 394 + (i % 2) * 6;
       const step = walking ? Math.round(Math.abs(Math.sin(t / 90 + i))) * 4 : Math.round(Math.sin(t / 600 + i)) * 2;
       ctx.fillStyle = 'rgba(0,0,0,0.35)';
-      ctx.fillRect(x - 24, y - 3, 48, 6);
-      blit(ctx, m.kind === 'merc' ? mercSprite(m) : heroSprite(m.id, s.flags), x, y - step, 3);
+      ctx.fillRect(x - 30, y - 3, 60, 6);
+      const walkFrame = walking ? Math.floor(t / 140) % 4 : null;
+      blit(ctx, m.kind === 'merc' ? mercSprite(m) : heroSprite(m.id, s.flags, null, walkFrame), x, y - step, 3);
     });
     vignette(ctx, 0.5);
     void currentNode;

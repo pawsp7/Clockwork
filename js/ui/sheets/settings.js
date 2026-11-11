@@ -53,6 +53,31 @@ export function openSettings(extra = []) {
           ),
           h('span'),
         ),
+        h(
+          'div.settings-row',
+          h('span', 'Auto-advance'),
+          btn(app.settings.autoAdvance ? 'On' : 'Off', () => {
+            app.settings.autoAdvance = !app.settings.autoAdvance;
+            app.saveSettings();
+            app.refreshSheet();
+          }, { cls: `small${app.settings.autoAdvance ? ' selected' : ''}`, title: 'Dialogue lines advance by themselves' }),
+          h('span'),
+        ),
+        h(
+          'div.settings-row',
+          h('span', 'Battle speed'),
+          h(
+            'div.row',
+            ['slow', 'normal', 'fast'].map((s) =>
+              btn(s[0].toUpperCase() + s.slice(1), () => {
+                app.settings.battleSpeed = s;
+                app.saveSettings();
+                app.refreshSheet();
+              }, { cls: `small${(app.settings.battleSpeed || 'normal') === s ? ' selected' : ''}`, title: 'How long each blow lingers. Enter skips ahead in any case.' }),
+            ),
+          ),
+          h('span'),
+        ),
         extra,
       ),
       h('div.sheet-foot', h('span.faint', { style: { fontSize: '13px' } }, 'Your journey saves itself in town and when you set out.'), h('div.spacer'), btn('Close', close, { cls: 'small' })),

@@ -58,7 +58,7 @@ export const mapScreen = {
       );
     }
     if (this.sel) app.ui.append(this.info(this.sel));
-    app.ui.append(h('div.dock', btn('◂ Back to town', () => toTown(), { cls: 'small', key: 'Esc' })));
+    app.ui.append(h('div.dock', h('span.keyhints', { style: { alignSelf: 'center' } }, h('span', h('b', '← →'), ' choose'), h('span', h('b', 'Enter'), ' set out')), btn('◂ Back to town', () => toTown(), { cls: 'small', key: 'B' })));
   },
 
   info(id) {
@@ -128,8 +128,17 @@ export const mapScreen = {
   },
 
   key(e) {
-    if (e.key === 'Escape') toTown();
-    if (e.key === 'Enter' && this.sel && status(app.state, this.sel) === 'open' && !app.state.pendingRest) depart(this.sel);
+    const k = e.key.toLowerCase();
+    if (k === 'b') return toTown();
+    if (e.key === 'Enter' && this.sel && status(app.state, this.sel) === 'open' && !app.state.pendingRest) return depart(this.sel);
+    if (e.key.startsWith('Arrow')) {
+      e.preventDefault();
+      const order = ['woods', 'volcano', 'fort', 'ruins', 'manor'];
+      const i = Math.max(0, order.indexOf(this.sel));
+      const d = e.key === 'ArrowRight' || e.key === 'ArrowDown' ? 1 : -1;
+      this.sel = order[(i + d + order.length) % order.length];
+      this.build();
+    }
   },
 };
 

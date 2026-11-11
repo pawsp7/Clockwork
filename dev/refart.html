@@ -1,0 +1,16 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><style>body{margin:0;background:#16121a}canvas{image-rendering:pixelated}</style></head>
+<body><canvas id="c" width="1500" height="1000"></canvas>
+<script type="module">
+import { loadArt } from '../js/art/refart.js';
+import { heroSprite, thugSprite, mercSprite, faithfulSprite } from '../js/art/sprites.js';
+import { portrait } from '../js/art/portraits.js';
+import { blit } from '../js/art/pixel.js';
+await loadArt('../assets/art/');
+const ctx = document.getElementById('c').getContext('2d');
+ctx.fillStyle = '#2a2230'; ctx.fillRect(0,0,1500,1000);
+const sprites = [heroSprite('alice'), heroSprite('alice',{shortHair:true}), heroSprite('alice',{shortHair:true,eyepatch:true}), heroSprite('mitzi'), heroSprite('victoria'), heroSprite('hestia'), heroSprite('hestia',{},'angry'), heroSprite('charon'), thugSprite('lanky'), thugSprite('knife'), mercSprite({template:'x',look:'monk',tint:'#5a4a36'}), faithfulSprite()];
+sprites.forEach((s,i)=>blit(ctx, s, 60+i*118, 300, 4));
+const ps = [['alice',{},null],['alice',{shortHair:true},null],['alice',{shortHair:true,eyepatch:true},'happy'],['mitzi',{},null],['mitzi',{},'happy'],['mitzi',{},'sad'],['victoria',{},null],['victoria',{},'angry'],['hestia',{},null],['hestia',{},'angry'],['hestia',{},null,true],['charon',{},null],['alice',{},'blink'],['victoria',{},'sad']];
+ps.forEach(([w,f,m,b],i)=>blit(ctx, portrait(w,f,m,b), 110+(i%7)*200, 560+Math.floor(i/7)*220, 3));
+</script></body></html>

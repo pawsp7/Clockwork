@@ -57,10 +57,29 @@ export const WEAPONS = {
     },
     unique: 0.5,
     note: '+50% attack while Alice wields it. Reforge it to keep it sharp.',
+    lore: 'Found in a drawer of broken things above ground. In Gehenna it unfolds into a blade, a whip or a wand — and it ticks one move ahead of everyone else.',
   },
-  hammer: { name: "Mitzi's Hammer", type: 'blunt', unique: 0.2, note: '+20% attack with hammers.' },
-  spear: { name: "Victoria's Spear", type: 'piercing', unique: 0.2, note: '+20% attack with spears.' },
-  cross: { name: "Hestia's Cross", type: 'random', unique: 0, note: 'Its edge changes with every swing.' },
+  hammer: {
+    name: "Mitzi's Hammer",
+    type: 'blunt',
+    unique: 0.2,
+    note: '+20% attack with hammers.',
+    lore: 'Heavier than it looks. For years Victoria carried it for her “in case”. Mitzi is only now finding out what it weighs.',
+  },
+  spear: {
+    name: "Victoria's Spear",
+    type: 'piercing',
+    unique: 0.2,
+    note: '+20% attack with spears.',
+    lore: 'Black-hafted and never lowered — not in empty halls, not at the dinner table, not while Mitzi sleeps.',
+  },
+  cross: {
+    name: "Hestia's Cross",
+    type: 'random',
+    unique: 0,
+    note: 'Its edge changes with every swing.',
+    lore: 'Gold on a chain. It cuts differently every time, as if it hasn’t decided what it is. Neither has she, she says.',
+  },
 };
 
 /** resist / weak: map of element or attack type → magnitude */

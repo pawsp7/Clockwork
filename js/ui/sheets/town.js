@@ -26,6 +26,7 @@ import { ITEMS, GEM_PRICE, MINGLE_COST } from '../../data/world.js';
 import { HEROES, WEAPONS, ARMOURS, ARMOUR_CRAFT } from '../../data/heroes.js';
 import { ELEMENTS, LABEL } from '../../data/constants.js';
 import { playScene } from '../flow.js';
+import { CHARON_TOPICS, charonAnswer, gossip } from '../../story/lore.js';
 
 function sheet(title, sub, body, { foot, portraitOf, width } = {}) {
   return (close) =>
@@ -34,7 +35,7 @@ function sheet(title, sub, body, { foot, portraitOf, width } = {}) {
       width ? { style: { left: `${(960 - width) / 2}px`, right: `${(960 - width) / 2}px` } } : {},
       h(
         'div.sheet-head',
-        portraitOf ? pix(portrait(portraitOf, app.state.flags), 1, 'portrait-slot') : null,
+        portraitOf ? pix(portrait(portraitOf, app.state.flags), 2, 'portrait-slot') : null,
         h('div', h('h2', title), sub ? h('div.sub', sub) : null),
         h('div.spacer'),
         h('div.chip', '◎ ', h('b', String(app.state.coins))),
@@ -95,26 +96,44 @@ function doRest(onChange) {
 
 // ─── Clinic ────────────────────────────────────────────────────────────────
 export function openClinic(onChange) {
-  let advice = charonAdvice(app.state);
-  const build = () =>
-    h(
+  let said = [charonAdvice(app.state)];
+  let asked = null;
+  const build = () => {
+    const st = app.state;
+    const topics = CHARON_TOPICS.filter((t) => t.when(st));
+    return h(
       'div',
-      h('div.speaker-card', h('div.bubble', advice), btn('Ask', () => {
-        advice = charonAdvice(app.state);
-        app.refreshSheet();
-      }, { cls: 'small' })),
+      h('div.speaker-card', h('div.bubble', said.map((line) => h('p', { style: { marginBottom: '6px' } }, line)))),
+      h('div.section-title', 'Ask Charon about…'),
+      h(
+        'div.row',
+        { style: { flexWrap: 'wrap', gap: '6px', marginBottom: '6px' } },
+        topics.map((t) =>
+          btn(t.q, () => {
+            asked = t.id;
+            said = charonAnswer(t, st);
+            app.refreshSheet();
+          }, { cls: `tiny${asked === t.id ? ' selected' : ''}` }),
+        ),
+        btn('Any advice?', () => {
+          asked = null;
+          said = [charonAdvice(st)];
+          app.refreshSheet();
+        }, { cls: 'tiny' }),
+      ),
       h('div.section-title', 'Remedies'),
       Object.entries(ITEMS).map(([id, it]) =>
         h(
           'div.shop-row',
           h('div.info', h('h3', it.name), h('p', it.desc)),
-          h('span.owned', `have ${app.state.items[id]}`),
+          h('span.owned', `have ${st.items[id]}`),
           price(it.price),
-          btn('Buy', () => act(buyItem(app.state, id), onChange), { cls: 'small', disabled: app.state.coins < it.price }),
+          btn('Buy', () => act(buyItem(st, id), onChange), { cls: 'small', disabled: st.coins < it.price }),
         ),
       ),
     );
-  app.openSheet(sheet('Charon’s Clinic', 'Doctor. Ferrywoman. Professional spoilsport.', build, { portraitOf: 'charon', width: 680 }));
+  };
+  app.openSheet(sheet('Charon’s Clinic', 'Doctor. Ferrywoman. Professional spoilsport.', build, { portraitOf: 'charon', width: 720 }));
 }
 
 // ─── Church ────────────────────────────────────────────────────────────────
@@ -139,6 +158,7 @@ export function openChurch() {
 
 // ─── Pub ───────────────────────────────────────────────────────────────────
 export function openPub(onChange, tab = 'mercs') {
+  let heard = gossip(app.state);
   const build = () => {
     const s = app.state;
     const tabs = h(
@@ -152,8 +172,13 @@ export function openPub(onChange, tab = 'mercs') {
         tab = 'jobs';
         app.refreshSheet();
       }, { cls: `small${tab === 'jobs' ? ' selected' : ''}` }),
+      btn('Gossip', () => {
+        tab = 'gossip';
+        app.refreshSheet();
+      }, { cls: `small${tab === 'gossip' ? ' selected' : ''}` }),
     );
     if (tab === 'jobs') return h('div', tabs, jobs(onChange));
+    if (tab === 'gossip') return h('div', tabs, h('div.section-title', 'Overheard at the bar'), heard.map((g) => h('div.shop-row', h('div.info', h('p', { style: { fontSize: '15px', color: 'var(--ink)' } }, `“${g}”`)))), btn('Listen some more', () => ((heard = gossip(s)), app.refreshSheet()), { cls: 'small' }));
     return h('div', tabs, mercs(onChange));
   };
   app.openSheet(sheet('The Pub', 'Sticky floors. Honest prices, mostly.', build, { width: 800 }));
