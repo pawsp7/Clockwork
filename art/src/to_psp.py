@@ -24,6 +24,8 @@ VISIBLE = 0x1             # layer flags
 RASTER_CONTENT = 0x1      # graphic contents: raster layers
 CHANNEL_RED, CHANNEL_GREEN, CHANNEL_BLUE = 1, 2, 3
 BITMAP_IMAGE = 0
+BITMAP_TRANS_MASK = 1     # transparency, stored as its own bitmap
+CHANNEL_COMPOSITE = 0
 
 
 def block(block_id, payload):
@@ -54,6 +56,7 @@ def image_attributes(w, h, layers=1):
 
 
 def layer(name, w, h, rgb_planes):
+    """rgb_planes: R, G, B, and optionally A (saved as a transparency mask)."""
     name_b = name.encode("ascii")
     rect = struct.pack("<iiii", 0, 0, w, h)
     empty = struct.pack("<iiii", 0, 0, 0, 0)
@@ -67,11 +70,16 @@ def layer(name, w, h, rgb_planes):
         + struct.pack("<BBBH", 0, 0, 0, 5)       # mask linked/disabled/invert, range count
         + blend + blend                          # source and destination ranges
     )
-    bitmaps = chunk(struct.pack("<HH", 1, 3))    # one bitmap, three channels
+    alpha = rgb_planes[3] if len(rgb_planes) > 3 else None
+    # one image bitmap (three channels), plus a transparency bitmap if there is one
+    bitmaps = chunk(struct.pack("<HH", 2 if alpha else 1, 4 if alpha else 3))
     channels = b""
     for ctype, plane in zip((CHANNEL_RED, CHANNEL_GREEN, CHANNEL_BLUE), rgb_planes):
         hdr = chunk(struct.pack("<IIHH", len(plane), len(plane), BITMAP_IMAGE, ctype))
         channels += block(CHANNEL_BLOCK, hdr + plane)
+    if alpha:
+        hdr = chunk(struct.pack("<IIHH", len(alpha), len(alpha), BITMAP_TRANS_MASK, CHANNEL_COMPOSITE))
+        channels += block(CHANNEL_BLOCK, hdr + alpha)
     return block(LAYER_BLOCK, info + bitmaps + channels)
 
 
@@ -89,7 +97,8 @@ def planes(im):
 
 
 def to_psp(png_path, psp_path):
-    im = Image.open(png_path).convert("RGB")
+    im = Image.open(png_path)
+    im = im.convert("RGBA" if im.mode in ("RGBA", "LA", "PA") or "transparency" in im.info else "RGB")
     w, h = im.size
     body = (SIGNATURE + struct.pack("<HH", MAJOR, MINOR)
             + block(IMAGE_BLOCK, image_attributes(w, h))

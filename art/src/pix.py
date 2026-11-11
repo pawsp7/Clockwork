@@ -103,6 +103,17 @@ class Layer:
                 if other.px[y][x] is not None:
                     self.px[y][x] = other.px[y][x]
 
+    def save_cutout(self, path, mask, scale=1):
+        """Save this layer's colours only where `mask` has pixels; transparent
+        everywhere else (the character without the background)."""
+        im = Image.new('RGBA', (self.w, self.h))
+        im.putdata([(c + (255,)) if m is not None else (0, 0, 0, 0)
+                    for row, mrow in zip(self.px, mask.px) for c, m in zip(row, mrow)])
+        if scale != 1:
+            im = im.resize((self.w * scale, self.h * scale), Image.NEAREST)
+        im.save(path)
+        return im
+
     def save(self, path, scale=1):
         im = Image.new('RGB', (self.w, self.h))
         im.putdata([c or (0, 0, 0) for row in self.px for c in row])

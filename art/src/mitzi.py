@@ -160,4 +160,7 @@ fig.stamp([
 res = finish(bg, fig, LINE, rim=lambda x, y: x > CX, rim_col=hx('ffb0d0'), rim_side=1)
 res.save(f'{OUT}/mitzi_portrait.png')
 res.save(f'{OUT}/mitzi_portrait_8x.png', 8)
+# the same portrait without the background
+res.save_cutout(f'{OUT}/mitzi_portrait_transparent.png', fig)
+res.save_cutout(f'{OUT}/mitzi_portrait_transparent_8x.png', fig, 8)
 print('ok')

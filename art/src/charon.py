@@ -224,4 +224,7 @@ for y in range(H):
 
 out.save(f'{OUT}/charon_portrait.png')
 out.save(f'{OUT}/charon_portrait_8x.png', 8)
+# the same portrait without the background
+out.save_cutout(f'{OUT}/charon_portrait_transparent.png', fig)
+out.save_cutout(f'{OUT}/charon_portrait_transparent_8x.png', fig, 8)
 print('ok')

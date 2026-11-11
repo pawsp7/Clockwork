@@ -160,4 +160,7 @@ for y in range(H):
             res.put(x, y, blend(res.get(x, y), hx('fff2c0'), a if dith(x, y, 0.6) else a * 0.5))
 res.save(f'{OUT}/alice_portrait.png')
 res.save(f'{OUT}/alice_portrait_8x.png', 8)
+# the same portrait without the background
+res.save_cutout(f'{OUT}/alice_portrait_transparent.png', fig)
+res.save_cutout(f'{OUT}/alice_portrait_transparent_8x.png', fig, 8)
 print('ok')

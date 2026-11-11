@@ -141,4 +141,7 @@ fig.put(26, 50, hx('d0ced8')); fig.put(25, 51, hx('7a7884')); fig.put(27, 51, hx
 res = finish(bg, fig, LINE, rim=lambda x, y: y > 30, rim_col=hx('e07050'), rim_side=-1)
 res.save(f'{OUT}/victoria_portrait.png')
 res.save(f'{OUT}/victoria_portrait_8x.png', 8)
+# the same portrait without the background
+res.save_cutout(f'{OUT}/victoria_portrait_transparent.png', fig)
+res.save_cutout(f'{OUT}/victoria_portrait_transparent_8x.png', fig, 8)
 print('ok')

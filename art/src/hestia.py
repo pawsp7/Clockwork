@@ -222,4 +222,7 @@ for y in range(70, H):          # candlelight rim on the black dress
             out.put(x, y, hx('5a4650'))
 out.save(f'{OUT}/hestia_portrait.png')
 out.save(f'{OUT}/hestia_portrait_8x.png', 8)
+# the same portrait without the background
+out.save_cutout(f'{OUT}/hestia_portrait_transparent.png', fig)
+out.save_cutout(f'{OUT}/hestia_portrait_transparent_8x.png', fig, 8)
 print('ok')
