@@ -98,7 +98,7 @@ draw_eyes(fig, 'wide', ('1f5f70', '2f8fa2', '5fc4d2', 'b4f0f4'), lash='3e1c28', 
 for x in range(35, 42): fig.put(x, 36 - (1 if 37 <= x <= 39 else 0), HAIR[1])
 for x in range(55, 62): fig.put(x, 36 - (1 if 57 <= x <= 59 else 0), HAIR[1])
 nose(fig, SKIN)
-fig.stamp([".a.", "aba", ".a."], {'a': hx('c06a6e'), 'b': hx('7a3640')}, 47, 57)   # a small 'oh'
+fig.stamp([".a.", "aba", ".a."], {'a': hx('c06a6e'), 'b': hx('7a3640')}, 47, 55)   # a small 'oh'
 
 
 # fringe: soft clumps from a centre part, curling in toward the face

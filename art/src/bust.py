@@ -6,18 +6,18 @@ W = H = 96
 CX = 48
 
 
-def face_hw(y, top_w=14.2, jaw=44, bottom=63):
-    """Half-width of the face: a round face. The cheeks stay full well below
-    the eyes (a little fuller around the blush), then curve round into a soft
-    chin instead of tapering to a point."""
+def face_hw(y, top_w=14.4, jaw=42, bottom=61):
+    """Half-width of the face: round and a little short, the cute anime way.
+    Full cheeks just below the eyes, then the lower face is close to a half
+    circle, ending in a soft round chin."""
     if y < jaw:
         return top_w
     t = min(1.0, (y - jaw) / (bottom - jaw))
-    fuller = 0.7 * math.sin(min(1.0, t * 1.6) * math.pi)    # chubby cheeks
-    return max(1.5, (top_w + fuller) * (1 - t ** 2.4) ** 0.5)
+    fuller = 0.9 * math.sin(min(1.0, t * 1.5) * math.pi)    # round cheeks
+    return max(1.5, (top_w + fuller) * (1 - t ** 2.0) ** 0.5)
 
 
-def face(fig, SKIN, BLUSH, top=26, bottom=63, blush_y=52):
+def face(fig, SKIN, BLUSH, top=26, bottom=61, blush_y=50):
     """Lit from the upper left, in flat bands: a shadow down the right side and
     under the jaw, a darker line along the jaw, a lit cheek on the left."""
     def col(x, y):
@@ -32,7 +32,7 @@ def face(fig, SKIN, BLUSH, top=26, bottom=63, blush_y=52):
           [(CX + face_hw(y) + 1, y) for y in range(bottom, top - 1, -1)]
     fig.poly(pts, col)
     # jawline: one darker pixel along the lower edge on the shadow side
-    for y in range(50, bottom + 1):
+    for y in range(48, bottom + 1):
         x = round(CX + face_hw(y))
         if fig.get(x, y) in SKIN:
             fig.put(x, y, SKIN[3])
@@ -49,43 +49,49 @@ def face(fig, SKIN, BLUSH, top=26, bottom=63, blush_y=52):
 # Eyes, 11 wide x 9 tall, drawn for the viewer's left eye and mirrored.
 # k lash  w white  1-4 iris dark->light  p pupil  h highlight  l lower lid
 EYE_SHAPES = {
-    'wide': [            # open and bright (Alice, Mitzi)
+    'wide': [            # big and bright (Alice, Mitzi)
         "...kkkkkk..",
         ".kkkkkkkkkk",
-        "kk.w11111k.",
-        "...whh122w.",
-        "...wh2p22w.",
-        "...w33p3hw.",
-        "...w34443w.",
-        "....l444l..",
+        "kkk111111k.",
+        ".w1hh1112w.",
+        ".w1hh2222w.",
+        ".w22pp223w.",
+        ".w23pp233w.",
+        ".w2333h33w.",
+        ".w3344433w.",
+        "..w44444w..",
         "...........",
     ],
-    'lidded': [          # heavy lid, half-closed (Hestia, Charon)
+    'lidded': [          # heavy, sleepy lid (Hestia, Charon)
         "...........",
         "...........",
-        "..kkkkkkkk.",
-        "kkkkkkkkkkk",
-        "k..wh1111w.",
-        "...wh2p22w.",
-        "...w33p3hw.",
-        "....l444l..",
+        "...kkkkkk..",
+        ".kkkkkkkkkk",
+        "kkk111111k.",
+        ".w1hh1112w.",
+        ".w2hpp223w.",
+        ".w23pp333w.",
+        ".w3344h33w.",
+        "..w44444w..",
         "...........",
     ],
     'sharp': [           # lined top and bottom (Victoria)
-        "..kkkkkkk..",
-        "kkkkkkkkkkk",
-        "kk.w11111kk",
-        "...whh122w.",
-        "...wh2p22w.",
-        "...w33p3hw.",
-        "...w34443k.",
-        "....k444k..",
-        ".....kkk...",
+        "...kkkkkk..",
+        ".kkkkkkkkkk",
+        "kkk111111kk",
+        ".w1hh1112w.",
+        ".w1hh2222w.",
+        ".w22pp223w.",
+        ".w23pp233w.",
+        ".w2333h33w.",
+        ".w3344433k.",
+        "..k44444k..",
+        "...kkkkk...",
     ],
 }
 
 
-def draw_eyes(fig, shape, iris, lash, lid, y=39, lx=33, rx=53, pupil=None, white='f8f6fb'):
+def draw_eyes(fig, shape, iris, lash, lid, y=38, lx=34, rx=52, pupil=None, white='f8f6fb'):
     """iris: four colours dark->light (hex). Shaded top to bottom, a pupil,
     a big highlight upper left and a small one lower right."""
     from pix import hx as _hx
@@ -112,7 +118,7 @@ def eyes(fig, rows, pal, y=41, lx=33, rx=53):
 
 
 def nose(fig, SKIN, y=52):
-    fig.put(49, y, SKIN[2]); fig.put(49, y + 1, SKIN[3]); fig.put(48, y + 2, SKIN[2])
+    fig.put(49, y, SKIN[2])          # a cute nose is a single pixel
 
 
 def hair_shader(stops, light_x=-1.0, wave=0.95, diag=0.0):

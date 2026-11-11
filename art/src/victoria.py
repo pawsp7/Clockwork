@@ -91,11 +91,11 @@ fig.stamp([".a.", "bcb", "dcd", ".d."], {'a': RED[3], 'b': RED[2], 'c': RED[1], 
 
 face(fig, SKIN, BLUSH)
 draw_eyes(fig, 'sharp', ('1c1e3a', '3c4270', '6c74a0', 'aab2d8'), lash='0a080c', lid='c49090', pupil='0e0f20')
-for x in range(34, 43): fig.put(x, 36 if x > 36 else 37, HAIR[0])      # straight, serious brows
-for x in range(54, 63): fig.put(x, 36 if x < 60 else 37, HAIR[0])
+for x in range(34, 43): fig.put(x, 35 if x > 36 else 36, HAIR[0])      # straight, serious brows
+for x in range(54, 63): fig.put(x, 35 if x < 60 else 36, HAIR[0])
 nose(fig, SKIN)
-fig.stamp([".bab.", "bcccb", ".bbb."], {'a': RED[0], 'b': RED[2], 'c': RED[1]}, 46, 57)
-fig.put(55, 60, hx('3a1a1a'))                # the mole
+fig.stamp([".bab.", "bcccb", ".bbb."], {'a': RED[0], 'b': RED[2], 'c': RED[1]}, 46, 55)
+fig.put(54, 57, hx('3a1a1a'))                # the mole
 
 
 # blunt fringe: narrow clumps falling almost straight, ending level

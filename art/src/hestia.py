@@ -126,31 +126,9 @@ for side in (-1, 1):
 fig.poly([(43, 70), (53, 70), (51, 74), (45, 74)], SKIN[1])     # V of the neckline
 fig.line(44, 71, 48, 80, hx('8a7e96')); fig.line(52, 71, 48, 80, hx('8a7e96'))   # cord
 
-# the face
-def face_hw(y):
-    if y < 50:
-        return 14.2
-    t = min(1.0, (y - 50) / 13.5)
-    return max(1.5, 14.2 * (1 - t ** 1.7) ** 0.65)
-
-def skin_col(x, y):
-    t = 0.0
-    hw = face_hw(y)
-    if x - CX > hw - 4:                      # shadow side
-        t = 0.5
-    if x - CX > hw - 2:
-        t = 0.75
-    if y > 58 and abs(x - CX) > hw - 3:
-        t = max(t, 0.45)
-    return SKIN[int(t * 2 + 0.5)]   # flat bands: smooth, no speckle
-
-face = [(CX - face_hw(y), y) for y in range(26, 65)] + [(CX + face_hw(y) + 1, y) for y in range(64, 25, -1)]
-fig.poly(face, skin_col)
-for side in (-1, 1):           # blush
-    for x in range(CX + side * 10 - 2, CX + side * 10 + 3):
-        for y in (52, 53):
-            if not (y == 53 and abs(x - (CX + side * 10)) == 2):
-                fig.put(x, y, BLUSH)
+# the face: the shared round one
+from bust import face as round_face
+round_face(fig, SKIN, BLUSH)
 
 # eyes: calm, heavy-lashed, grey
 draw_eyes(fig, 'lidded', ('3a3644', '5c5868', '8a8696', 'c4c0cc'), lash='16111a', lid='d8aa92', pupil='6a1a28')   # a red pupil: what she is
@@ -158,9 +136,9 @@ draw_eyes(fig, 'lidded', ('3a3644', '5c5868', '8a8696', 'c4c0cc'), lash='16111a'
 for x in range(35, 43): fig.put(x, 37 - (1 if 37 <= x <= 40 else 0), HAIR[1])
 for x in range(54, 62): fig.put(x, 37 - (1 if 56 <= x <= 59 else 0), HAIR[1])
 # nose and mouth
-fig.put(49, 52, SKIN[2]); fig.put(49, 53, SKIN[3]); fig.put(48, 54, SKIN[2])
+fig.put(49, 52, SKIN[2])          # a single-pixel nose
 LIPS = {'a': hx('e88f56'), 'b': hx('f5b07e'), 'c': hx('d06e40')}
-fig.stamp([".bab.", "bacab", ".bbb."], LIPS, 46, 57)
+fig.stamp([".bab.", "bacab", ".bbb."], LIPS, 46, 55)
 
 # bangs: clumps fanning from a part right of centre, swept over the left brow
 from bust import draw_eyes, fringe

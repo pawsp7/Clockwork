@@ -101,11 +101,11 @@ for side in (-1, 1):   # stronger blush: she is always mid-laugh
     for x in range(CX + side * 10 - 3, CX + side * 10 + 4):
         if abs(x - (CX + side * 10)) <= 2: fig.put(x, 51, BLUSH)
 draw_eyes(fig, 'wide', ('3a4060', '5a6488', '8f9cc0', 'cdd6ec'), lash='0e0a10', lid='c79494', pupil='22263a')
-for x in range(35, 42): fig.put(x, 37 - (1 if 36 <= x <= 39 else 0), HAIR[1])
-for x in range(55, 62): fig.put(x, 37 - (1 if 57 <= x <= 60 else 0), HAIR[1])
+for x in range(35, 42): fig.put(x, 35 - (1 if 36 <= x <= 39 else 0), HAIR[1])
+for x in range(55, 62): fig.put(x, 35 - (1 if 57 <= x <= 60 else 0), HAIR[1])
 nose(fig, SKIN)
-fig.stamp(["kkkkkk", "kttttk", ".kmmk.", "..kk.."],
-          {'k': hx('9a4a5a'), 't': hx('ffffff'), 'm': hx('e07a8a')}, 45, 56)   # open, laughing
+fig.stamp(["kkkkk", "kmmmk", ".kmk."],
+          {'k': hx('9a4a5a'), 'm': hx('e07a8a')}, 46, 55)   # open, laughing
 
 
 # full, choppy fringe: many clumps, tips at uneven lengths
