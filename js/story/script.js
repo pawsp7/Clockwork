@@ -1,4 +1,4 @@
-import { n, sys, say, bg, music, fx, run, when, choice, opt, battle, end, goto, cast } from '../game/story.js';
+import { n, sys, say, bg, music, fx, run, when, choice, opt, battle, end, goto, cast, cg } from '../game/story.js';
 import { chance } from '../core/rng.js';
 
 /* Speakers: alice, mitzi, victoria, hestia, charon, thug, narrator, system.
@@ -27,6 +27,10 @@ const up = (d) => (s) => {
   s.flags.aliceUp += d;
 };
 const objective = (text) => run((s) => (s.objective = text));
+function unlockLore(s, id) {
+  s.lore ||= { found: [] };
+  if (!s.lore.found.includes(id)) s.lore.found.push(id);
+}
 
 export const SCENES = {
   // ════════════════════════════════════════════════════════════ PROLOGUE
@@ -36,10 +40,12 @@ export const SCENES = {
     n('Above ground, in a city that never learned her name, Alice found a pocket watch in a drawer of broken things.'),
     n('It was cold. It was heavy. It did not tick.'),
     a('Whose were you, I wonder?'),
+    cg('watch'),
     n('One evening, it opened by itself.'),
+    n('The second hand ran backwards. The streetlights bent like reeds. And the floor forgot to hold her.'),
     fx('distort', 1600),
     music('none'),
-    n('The second hand ran backwards. The streetlights bent like reeds. And the floor forgot to hold her.'),
+    cg(null),
     bg('outskirts'),
     music('outskirts'),
     fx('fadein'),
@@ -49,7 +55,11 @@ export const SCENES = {
     say('thug', 'Oi. Fresh one. Still smells like daylight.'),
     say('thug', 'Shiny watch. Bet that’s worth a few masses.'),
     a('If this is a dream, it is a very rude one.'),
-    battle({ kind: 'tutorial', bg: 'outskirts', label: 'Two Thugs' }),
+    battle({ kind: 'tutorial', bg: 'outskirts', label: 'Two Thugs' }, 'prologue_after'),
+  ],
+
+  prologue_after: [
+    bg('outskirts'),
     music('outskirts'),
     n('The thugs scatter into the alleys. A woman in a long brown coat steps out of a doorway, flipping a coin.'),
     c('Not bad. For a corpse.'),
@@ -59,6 +69,8 @@ export const SCENES = {
     choice([
       opt('“Gets out? So there is a way back?”', {
         fx: up(1),
+        note: 'Alice will remember that there might be a way up.',
+        tone: 'info',
         then: [c('Back? No. Up? Maybe.'), c('The sky takes people who finish what they started. Most never do.')],
       }),
       opt('“You’re joking.”', {
@@ -76,6 +88,7 @@ export const SCENES = {
     music('town'),
     n('Gehenna: a town under a sky of stone, lit by lanterns that burn the colour of spilled milk.'),
     n('Carts of white bottles creak past a church whose spire wears horns.'),
+    n('Nobody here owns a cow. Nobody asks where the milk comes from. The carts leave full every morning by the long road past the Manor, and come back empty.'),
     c('Milk’s the export. Faith’s the import. Don’t take either on an empty stomach.'),
     c('Inn for sleeping. Pub for hired blades and odd jobs. The Smithy will fix that watch. My Clinic will fix you.'),
     c('The gate leads out. The Dead Woods are closest.'),
@@ -93,12 +106,14 @@ export const SCENES = {
   woods_enter: [
     bg('woods'),
     n('The Dead Woods. Trees that forgot how to be trees, still standing out of habit.'),
+    cg('sisters'),
     v('Stop right there. You’re the surface girl. Alice, isn’t it?'),
     a('News travels fast for the dead.'),
     v('I’m Victoria. This is my sister, Mitzi. We live at the edge of the woods. Always have.'),
     mi('Hiii! Are you here for my gathering? It’s on Thursday. Is it Thursday? Vicky, is it Thursday?', 'happy'),
     v('There are no Thursdays here, Mitzi.'),
     v('The woods have been restless. If you’re going in, we’re coming. I won’t have things crawling toward our door.'),
+    cg(null),
     mi('She means she’s coming. I’m coming because she’s coming. I’m not fighting, though. Fighting is sweaty.'),
     choice([
       opt('“You don’t have to fight. But you could watch. Noticing things is a skill too.”', {
@@ -202,8 +217,11 @@ export const SCENES = {
 
   woods_boss: [
     bg('woods'),
+    cg('stag'),
     n('The trees lean apart around something tall. Antlers like a cathedral’s ribs. A hollow where its heart should be.'),
+    n('Moonlight falls straight through it.'),
     v('Mitzi. Behind me. Now.'),
+    cg(null),
     when(
       (s) => s.notebook.unlocked,
       [
@@ -293,6 +311,8 @@ export const SCENES = {
     mi('I went once! I napped for three days. Super restful.', 'happy'),
     choice([
       opt('“Lighter how, exactly?”', {
+        note: 'Hestia notices the question. So does Alice.',
+        tone: 'good',
         fx: (s) => {
           s.flags.hestiaWary += 1;
           s.flags.aliceUp += 1;
@@ -394,10 +414,15 @@ export const SCENES = {
     n('Fire licks over Alice’s shoulder. The smell of burning hair — sweet, and wrong.'),
     mi('ALICE! Your hair! Half your — oh no. Oh no, it’s uneven.', 'shock'),
     a('…Knife.'),
+    cg('haircut'),
+    n('She saws the rest off at the jaw. It isn’t neat. Pink curls drift down into the heat and are gone before they land.'),
     run((s) => (s.flags.shortHair = true)),
-    n('She saws the rest off at the jaw. It isn’t neat. The watch ticks on, unbothered.'),
+    n('The watch ticks on, unbothered.'),
     a('Lighter. That’s one way to be lighter.'),
+    cg('maw'),
     n('Below, the lava heaves. Something rises out of it with a mouth where its whole front should be.'),
+    mi('Is it— is it SMILING at us?'),
+    cg(null),
     end('trail'),
   ],
 
@@ -454,7 +479,12 @@ export const SCENES = {
     n('The Abandoned Fort. Gates sagging, banners rotted to lace. It smells of iron and old decisions.'),
     v('Stay in my shadow, Mitzi.'),
     mi('I can go first this time, I’ve been practising my—'),
+    cg('argument'),
     v('No. I step first. Always.', 'angry'),
+    mi('You ALWAYS step first! You stepped first at breakfast! You step first into ROOMS!', 'angry'),
+    v('Because something might be in them, Mitzi!', 'angry'),
+    n('The fort swallows the echo. Neither of them looks away first.'),
+    cg(null),
     sys('In the Fort, Victoria will step in front of Mitzi whenever Mitzi tries to act.'),
     choice([
       opt('“Victoria, if you never step aside, she never learns where to stand.”', {
@@ -500,8 +530,11 @@ export const SCENES = {
     n('A corridor between two walls. Too narrow. Wet stone. Victoria stops walking.'),
     v('…I know this place.'),
     a('You’ve been here before?'),
+    cg('alley'),
     v('Not here. An alley. Wet bricks. Somebody laughing. Mitzi asleep against my shoulder, because we had nowhere—', 'sad'),
+    n('Rain that isn’t falling. A streetlamp that isn’t there. Two shapes at the mouth of the alley, hoods up.'),
     v('That isn’t right. We grew up here. In Gehenna. We grew up HERE.', 'angry'),
+    cg(null),
     choice([
       opt('“Victoria. What would you do, if you didn’t have to watch her every second?”', {
         score: 'fort',
@@ -581,11 +614,14 @@ export const SCENES = {
   night_fort: [
     bg('church'),
     music('hestia'),
+    cg('hestia'),
     n('Beneath the horned church, where the candles are made of something that isn’t wax…'),
     h('Three new lambs. The sisters cling to each other like drowning swimmers. They’ll kneel by spring.', 'angry'),
     h('But the surface girl. She still looks UP.', 'angry'),
     h('Nobody who falls here deserves the sky. They had their chance. They spent it.', 'angry'),
-    n('Her eyes burn red. At the sound of a footstep, they cool to blue again.'),
+    n('Her eyes burn red. On the wall behind her, her shadow wears horns.'),
+    n('At the sound of a footstep, the eyes cool to blue again.'),
+    cg(null),
     bg('town'),
     music('town'),
     h('Children! I hear you’re bound for the Ruins.', 'happy'),
@@ -682,8 +718,10 @@ export const SCENES = {
     ]),
     fx('flash'),
     fx('shake'),
+    cg('trap'),
     n('A click. Wires sing. A volley of needles from a carved saint’s mouth.'),
     n('Pain blooms white across Alice’s left eye.'),
+    cg(null),
     mi('ALICE!', 'shock'),
     v('Hold still. Hold STILL. Mitzi — the cloth.'),
     n('Mitzi’s hands shake, but she ties it. Clean. Tight. Her first bandage.'),
@@ -718,6 +756,64 @@ export const SCENES = {
     end('return'),
   ],
 
+
+  // ════════════════════════════════════════════════════════════ CAMPFIRES
+  woods_camp: [
+    bg('woods'),
+    n('They make camp in a ring of dead birches. Victoria builds the fire. Mitzi supervises.'),
+    mi('You don’t need fire for warmth in Gehenna. It’s more of a vibe.'),
+    v('Fire keeps the things in the trees honest.'),
+    a('What lives out here?'),
+    v('People who wandered off from mass. The longer they stay out, the less they look like anyone.'),
+    mi('The triangle one with the green eyes used to sell buttons. I’m like seventy percent sure.'),
+    n('Victoria tips something from a flask into her tea when she thinks nobody is looking. Mitzi is looking. Mitzi says nothing.'),
+    run((s) => unlockLore(s, 'woods_folk')),
+    end('trail'),
+  ],
+
+  volcano_camp: [
+    bg('volcano'),
+    n('A shelf of cooled rock above the lava. Warm enough to sleep without blankets, if you don’t mind dreaming of ovens.'),
+    v('Even the Milk Guild won’t haul through here. Too hot. The milk turns.'),
+    a('Where does the milk go, anyway?'),
+    v('Up the long road past the Manor. Every morning. Nobody follows the carts.'),
+    mi('I followed one once! It just kept going up and up. Then I got bored and came home.'),
+    v('…You never told me that.'),
+    mi('You never asked!', 'happy'),
+    n('Mitzi turns her hammer over in her hands, testing the weight like she has never held anything heavy before. Maybe she hasn’t.'),
+    run((s) => unlockLore(s, 'milk_road')),
+    end('trail'),
+  ],
+
+  fort_camp: [
+    bg('fort'),
+    n('They sleep in the old barracks. Every bunk is made, corners tucked. Nobody has slept in them for a very long time.'),
+    a('Who kept this place?'),
+    v('Soldiers, before the Ox. They guarded the road to the Ruins.'),
+    v('Then the church said there was nothing left out there to guard against, and they all went to mass instead.'),
+    mi('Vicky, you’re doing the voice.'),
+    v('What voice?'),
+    mi('The bedtime-story voice. You used to do it every night. Back when—'),
+    n('Mitzi stops. Neither of them finishes the sentence. The fire does it for them, popping once.'),
+    run((s) => unlockLore(s, 'fort_garrison')),
+    end('trail'),
+  ],
+
+  ruins_camp: [
+    bg('ruins'),
+    n('A collapsed chapel. A clock face the size of a door lies on its back in the rubble, its hands rusted at midnight.'),
+    h('The Old Faith counted sins by the hour. A bell every hour, a confession every bell. Exhausting.'),
+    h('The Ox offered something kinder: one mass a day, and you never have to count again.'),
+    a('And the clock-keepers?'),
+    h('They came around. Everyone comes around.', 'happy'),
+    n('When Hestia lies down — if she sleeps at all — she lies facing the dark corners.'),
+    mi('(whispering) Alice. Her shadow has horns.'),
+    a('(whispering) It’s the rubble.'),
+    mi('(whispering) …Right. Rubble.'),
+    run((s) => unlockLore(s, 'old_faith')),
+    end('trail'),
+  ],
+
   // ════════════════════════════════════════════════════════════ LAST NIGHT
   last_night: [
     bg('inn_night'),
@@ -742,14 +838,20 @@ export const SCENES = {
     mi('…I heard Vicky crying last night. I pretended to be asleep. I’m really good at pretending to be asleep.', 'sad'),
     choice([
       opt('“Next time, don’t pretend. Go downstairs. Sit with her.”', {
+        note: 'Mitzi has decided to stay up for her sister.',
+        tone: 'good',
         fx: (s) => (s.flags.mitziRedeemed = true),
         then: [mi('And say what?'), a('Nothing. Just be the one who stays up, for once.'), mi('…Okay. Okay. I can do that.')],
       }),
       opt('“What would you do, if Victoria wasn’t there to do it for you?”', {
+        note: 'Mitzi has decided to try being her own person.',
+        tone: 'good',
         fx: (s) => (s.flags.mitziRedeemed = true),
         then: [mi('Panic? Then… figure it out? Then panic again, but smaller?'), a('That’s called living.'), mi('Huh. It sounds exhausting. I want to try it.', 'happy')],
       }),
       opt('“She’ll be fine. She always is.”', {
+        note: 'Mitzi goes back to pretending.',
+        tone: 'bad',
         then: [mi('Yeah. She always is.'), n('Mitzi rolls over. She is very good at pretending to be asleep.')],
       }),
     ]),
@@ -765,6 +867,8 @@ export const SCENES = {
     v('We didn’t grow up here. We died. And I’ve been raising her in a graveyard.'),
     choice([
       opt('“Then stop raising her. Start knowing her. And live one hour for yourself.”', {
+        note: 'Victoria sets down the glass.',
+        tone: 'good',
         fx: (s) => {
           s.flags.victoriaRedeemed = true;
           s.flags.victoriaMode = 'assist';
@@ -772,6 +876,8 @@ export const SCENES = {
         then: [v('One hour.'), v('I wouldn’t know what to do with it.'), a('Finish a book.'), n('Victoria laughs. It cracks in the middle, but it is real.')],
       }),
       opt('“It wasn’t your fault.”', {
+        note: 'Something in Victoria finally lets go.',
+        tone: 'good',
         fx: (s) => {
           s.flags.victoriaRedeemed = true;
           s.flags.victoriaMode = 'assist';
@@ -779,6 +885,8 @@ export const SCENES = {
         then: [v('…Say it again.'), a('It wasn’t your fault.'), n('Victoria puts the glass upside down on the table, and leaves it there.')],
       }),
       opt('“She’s lucky to have you.”', {
+        note: 'Victoria pours another glass.',
+        tone: 'bad',
         then: [v('Is she?'), n('She pours another glass.')],
       }),
     ]),
@@ -796,14 +904,20 @@ export const SCENES = {
     choice([
       opt('“What is my business?”', {
         fx: up(2),
+        note: 'Alice feels the door in the sky a little closer.',
+        tone: 'good',
         then: [c('Letting go of the way back. There is no back. There is only up.')],
       }),
       opt('“Why help me?”', {
         fx: up(2),
+        note: 'Alice feels the door in the sky a little closer.',
+        tone: 'good',
         then: [c('I collect coins. You’re a rare one.'), c('I’d like to see you spent well.')],
       }),
       opt('“Everyone says you’re just trolling.”', {
         fx: up(1),
+        note: 'Charon shrugs. The door feels a little closer anyway.',
+        tone: 'info',
         then: [c('Everyone’s dead, dear. They say a lot of things.')],
       }),
     ]),
@@ -825,6 +939,8 @@ export const SCENES = {
         then: [goto('night_hestia_roll')],
       }),
       opt('“Maybe peace is worth the price.”', {
+        note: 'Hestia will remember how easily you bent.',
+        tone: 'bad',
         fx: (s) => {
           s.flags.hestiaBoost = true;
           s.flags.hestiaNightWin = false;
@@ -869,9 +985,15 @@ export const SCENES = {
     fx('flash'),
     fx('shake'),
     music('ox'),
+    cg('ox'),
     n('Hestia’s habit splits like a seed husk. What rises is white, and vast, and horned. Its wings are hymn-sheets. Its bells ring without moving.'),
     n('Its eyes stay closed. It does not need them for you.'),
-    battle({ kind: 'boss', bossId: 'white_ox', tier: 5, bg: 'manor', label: 'The White Ox' }),
+    cg(null),
+    battle({ kind: 'boss', bossId: 'white_ox', tier: 5, bg: 'manor', label: 'The White Ox' }, 'manor_after'),
+  ],
+
+  manor_after: [
+    bg('manor'),
     music('after'),
     n('The White Ox kneels. The bells go quiet, one by one.'),
     n('Where it stood, Hestia sits in the ash of her habit, eyes red and unhidden.'),

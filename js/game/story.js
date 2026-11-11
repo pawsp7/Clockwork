@@ -18,6 +18,7 @@ export class StoryRunner {
     this.pendingChoice = null;
     this.cast = [];
     this.bg = null;
+    this.cg = null;
     this.ended = false;
     if (!scenes[sceneId]) throw new Error(`Unknown scene: ${sceneId}`);
   }
@@ -90,7 +91,15 @@ export class StoryRunner {
         return this.pendingChoice;
       }
       case 'battle':
-        return { type: 'battle', opts: typeof cmd.opts === 'function' ? cmd.opts(s) : cmd.opts };
+        // a battle ends the scene; the story picks up again in `after` once it is won
+        this.ended = true;
+        this.stack = [];
+        return { type: 'battle', opts: typeof cmd.opts === 'function' ? cmd.opts(s) : cmd.opts, after: cmd.after || null };
+      case 'cg':
+        this.cg = cmd.v;
+        this.hooks.cg?.(cmd.v);
+        if (cmd.v && typeof localStorage !== 'undefined') unlockCg(cmd.v);
+        return null;
       case 'goto':
         this.stack = [{ list: this.scenes[cmd.v], i: 0 }];
         this.sceneId = cmd.v;
@@ -104,16 +113,29 @@ export class StoryRunner {
     }
   }
 
+  /** Returns the feedback note for the choice (or null), or false if nothing was chosen. */
   choose(i) {
     if (!this.pendingChoice) return false;
     const opt = this.pendingChoice.options.find((o) => o.index === i) || this.pendingChoice.options[i];
     if (!opt) return false;
     this.pendingChoice = null;
-    applyChoice(this.state, opt);
+    const note = applyChoice(this.state, opt);
     this._push(opt.then);
-    return true;
+    this.lastNote = note;
+    return note;
   }
 }
+
+/** What a choice tells the player about its consequence. */
+const DEFAULT_NOTES = {
+  woods: { good: 'Mitzi is paying attention.', bad: 'Mitzi shrinks a little further behind her sister.' },
+  volcano: {
+    good: (s) => `Mitzi plants her feet. Her strength rises to ${s.flags.mitziAtk}.`,
+    bad: (s) => `Mitzi holds back. Her strength falls to ${s.flags.mitziAtk}.`,
+  },
+  fort: { good: 'Victoria’s grip loosens.', bad: 'Victoria’s grip tightens.' },
+  ruins: { good: 'Alice keeps her guard up around Hestia.', bad: 'Hestia’s smile widens.' },
+};
 
 export function applyChoice(state, opt) {
   if (opt.score) {
@@ -122,6 +144,22 @@ export function applyChoice(state, opt) {
     if (opt.good) sc.good += 1;
   }
   if (opt.fx) opt.fx(state);
+  let text = opt.note;
+  if (text === undefined && opt.score && DEFAULT_NOTES[opt.score]) text = DEFAULT_NOTES[opt.score][opt.good ? 'good' : 'bad'];
+  if (typeof text === 'function') text = text(state);
+  if (!text) return null;
+  const tone = opt.tone || (opt.score ? (opt.good ? 'good' : 'bad') : 'info');
+  return { text, tone };
+}
+
+function unlockCg(id) {
+  try {
+    const set = new Set(JSON.parse(localStorage.getItem('clockwork.cgs') || '[]'));
+    set.add(id);
+    localStorage.setItem('clockwork.cgs', JSON.stringify([...set]));
+  } catch {
+    /* ignore */
+  }
 }
 
 // ─── Command builders used by the script ──────────────────────────────────
@@ -137,6 +175,7 @@ export const run = (fn) => ({ k: 'do', fn });
 export const when = (test, then, otherwise) => ({ k: 'if', test, then, else: otherwise });
 export const choice = (options, prompt) => ({ k: 'choice', options, prompt });
 export const opt = (text, extra = {}) => ({ text, ...extra });
-export const battle = (opts) => ({ k: 'battle', opts });
+export const battle = (opts, after) => ({ k: 'battle', opts, after });
+export const cg = (v) => ({ k: 'cg', v });
 export const goto = (v) => ({ k: 'goto', v });
 export const end = (v) => ({ k: 'end', v });

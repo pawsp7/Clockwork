@@ -1,7 +1,8 @@
 import { h, clear } from './dom.js';
 import { FxLayer, SW, SH } from '../art/fx.js';
 import { audio } from '../core/audio.js';
-import { saveGame, loadGame } from '../game/state.js';
+import { saveGame, latestSave } from '../game/state.js';
+import { openMenu, moveFocus } from './sheets/menu.js';
 
 /**
  * App shell: owns the stage, the render loop, screen switching, modal sheets and toasts.
@@ -15,7 +16,7 @@ export const app = {
   sheet: null,
   fx: new FxLayer(),
   busy: false,
-  settings: { textSpeed: 'normal' },
+  settings: { textSpeed: 'normal', battleSpeed: 'normal' },
 
   init() {
     this.stage = document.getElementById('stage');
@@ -119,13 +120,17 @@ export const app = {
     const el = build(() => this.closeSheet());
     this.overlay.append(scrim, el);
     this.sheet = { el, scrim, opts, rebuild: () => this.openSheet(build, opts) };
-    audio.sfx('door');
+    if (!opts.silent) audio.sfx('door');
+    // keyboard players land on the first useful button
+    const first = el.querySelector('.sheet-body button:not([disabled])') || el.querySelector('button:not([disabled])');
+    if (first && !opts.noFocus) setTimeout(() => first.focus({ preventScroll: true }), 0);
     return el;
   },
   refreshSheet() {
     if (!this.sheet) return;
     const body = this.sheet.el.querySelector('.sheet-body');
     const scroll = body ? body.scrollTop : 0;
+    this.sheet.opts.silent = true;
     this.sheet.rebuild();
     const nb = this.sheet?.el.querySelector('.sheet-body');
     if (nb) nb.scrollTop = scroll;
@@ -155,17 +160,29 @@ export const app = {
       e.preventDefault();
       return;
     }
-    if (e.key === 'Escape' && this.sheet) {
-      if (!this.sheet.opts.locked) this.closeSheet();
+    if (e.key === 'Escape') {
       e.preventDefault();
+      if (this.sheet) {
+        if (!this.sheet.opts.locked) this.closeSheet();
+        return;
+      }
+      if (this.screen?.escape?.()) return;
+      this.openMenu();
       return;
     }
-    if (this.sheet?.opts.key) {
-      this.sheet.opts.key(e);
+    if (this.sheet) {
+      if (this.sheet.opts.key) this.sheet.opts.key(e);
+      else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        moveFocus(e.key === 'ArrowDown' ? 1 : -1);
+      }
       return;
     }
-    if (this.sheet) return;
     this.screen?.key?.(e);
+  },
+
+  openMenu() {
+    openMenu();
   },
 
   // ─── persistence ───────────────────────────────────────────────────────
@@ -173,6 +190,6 @@ export const app = {
     if (this.state) saveGame(this.state, 'auto');
   },
   hasSave() {
-    return !!loadGame('auto');
+    return !!latestSave();
   },
 };

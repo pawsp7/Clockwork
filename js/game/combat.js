@@ -179,6 +179,7 @@ export function createCombat(state, opts) {
     hestiaAtk: int(6, 9),
     hestiaType: pick(TYPES),
     tutorial: kind === 'tutorial' ? { round: 0 } : null,
+    afterScene: opts.after || null,
     result: null,
     rewards: null,
   };
@@ -353,6 +354,9 @@ export function actionsFor(state, m) {
     label: 'Guard',
     disabled: woodsMitzi ? 'Mitzi refuses to fight in the Dead Woods.' : null,
   });
+  out.push({ id: 'item', label: 'Item', disabled: anyItem && !tutorialLock ? null : 'No items to use.' });
+  out.push({ id: 'wait', label: m.id === 'mitzi' && woodsMitzi ? 'Dawdle' : 'Wait', disabled: null });
+  // Study is always the fifth order, so 1–4 mean the same thing for everyone.
   if (m.id === 'mitzi') {
     out.push({
       id: 'study',
@@ -360,8 +364,6 @@ export function actionsFor(state, m) {
       disabled: state.notebook.unlocked ? null : 'Mitzi hasn’t learned to study yet.',
     });
   }
-  out.push({ id: 'item', label: 'Item', disabled: anyItem && !tutorialLock ? null : 'No items to use.' });
-  out.push({ id: 'wait', label: m.id === 'mitzi' && woodsMitzi ? 'Dawdle' : 'Wait', disabled: null });
   if (tutorialLock) {
     const want = c.round === 1 ? 'strike' : 'guard';
     for (const a of out) if (a.id !== want && !a.disabled) a.disabled = 'Follow the watch for now.';

@@ -19,16 +19,22 @@ import {
   displayName,
 } from '../../game/combat.js';
 import { livingMembers, partyMembers, memberId, memberById, memberGems, attackPower, weaponType } from '../../game/state.js';
-import { infer, profileShort } from '../../game/notebook.js';
+import { infer, profileLabel } from '../../game/notebook.js';
 import { afterBattle } from '../../game/expedition.js';
 import { INTENT_INFO } from '../../data/monsters.js';
 import { ITEMS } from '../../data/world.js';
 import { SHORT, LABEL, RULES, COUNTER, BEATS } from '../../data/constants.js';
 import { HEROES, ARMOURS } from '../../data/heroes.js';
 import { defeat, playScene } from '../flow.js';
+import { openMenu } from '../sheets/menu.js';
 
 const FEET = 342;
-const STEP_MS = 520;
+const PACE = { slow: 2.2, normal: 1.6, fast: 0.85 };
+const pace = () => PACE[app.settings.battleSpeed] || PACE.normal;
+/** How long each event lingers, and how long before a blow lands. */
+const STEP = () => Math.round(520 * pace());
+const HIT = () => Math.round(170 * Math.min(pace(), 1.5));
+const ANIM = () => 360 * Math.min(pace(), 1.4);
 
 const INTENT_ICON = { attack: '⚔', ransack: '⚔', sweep: '≋', guard: '⛨', idle: '…', summon: '✶', toll: '♪' };
 const TAG_LABEL = { weak: 'WEAK', resist: 'RESIST', super: 'ELEMENT!', dull: 'DULLED', exposed: 'EXPOSED!' };
@@ -63,6 +69,7 @@ export const combatScreen = {
 
   exit() {
     this.tip?.remove();
+    clearTimeout(this.timer);
   },
 
   banner(title, sub) {
@@ -100,7 +107,7 @@ export const combatScreen = {
   foeHeight(e) {
     if (e.bossId === 'white_ox') return 276;
     if (e.bossId) return 234;
-    if (e.human) return 108;
+    if (e.human) return 144;
     if (e.faithful) return 132;
     return 132;
   },
@@ -230,6 +237,12 @@ export const combatScreen = {
   },
 
   playNext() {
+    clearTimeout(this.timer);
+    // hold the action while a menu is open
+    if (app.sheet) {
+      this.timer = setTimeout(() => this.playNext(), 200);
+      return;
+    }
     const ev = this.queue.shift();
     if (!ev) {
       this.playing = false;
@@ -238,7 +251,27 @@ export const combatScreen = {
     }
     const wait = this.animate(ev);
     this.sync();
-    setTimeout(() => this.playNext(), wait);
+    this.timer = setTimeout(() => this.playNext(), wait);
+  },
+
+  skipAhead() {
+    if (this.playing) this.playNext();
+  },
+
+  canSave() {
+    return this.c?.phase === 'plan' && !this.playing && !this.won;
+  },
+  saveBlockedReason: 'Wait for the blows to land — you can save while giving orders.',
+
+  escape() {
+    if (this.mode) {
+      this.mode = null;
+      this.pending = null;
+      this.hideTip();
+      this.sync();
+      return true;
+    }
+    return false;
   },
 
   finishRound() {
@@ -268,7 +301,7 @@ export const combatScreen = {
   // ─── event animation ───────────────────────────────────────────────────
   pos(id) {
     const hs = this.heroSlots().find((s) => s.id === id);
-    if (hs) return { x: hs.x, y: hs.y - 54, foot: hs.y };
+    if (hs) return { x: hs.x, y: hs.y - 70, foot: hs.y };
     const fs = this.foeSlots().find((s) => s.e.uid === id);
     if (fs) return { x: fs.x, y: fs.y - this.foeHeight(fs.e) / 2, foot: fs.y };
     return { x: 480, y: 270, foot: FEET };
@@ -295,8 +328,8 @@ export const combatScreen = {
           if (big) fx.shake(5, 180);
           if (ev.element) fx.burst(to.x, to.y, elementColor(ev.element), 10, 140);
           audio.sfx(big ? 'bigstrike' : 'strike');
-        }, 160);
-        return STEP_MS;
+        }, HIT());
+        return STEP();
       }
       case 'strikeBlocked': {
         const to = this.pos(ev.enemy);
@@ -305,8 +338,8 @@ export const combatScreen = {
           fx.text(to.x, to.y - 30, 'BLOCKED', '#a8c0d8', { size: 20 });
           fx.ring(to.x, to.y, '#8ab0d8', 46);
           audio.sfx('blocked');
-        }, 160);
-        return STEP_MS;
+        }, HIT());
+        return STEP();
       }
       case 'study': {
         const to = this.pos(ev.enemy);
@@ -324,14 +357,14 @@ export const combatScreen = {
             audio.sfx('note');
           }, 300);
         }
-        return STEP_MS + 120;
+        return STEP() + 120;
       }
       case 'item': {
         const to = this.pos(ev.to || ev.who);
         audio.sfx('heal');
         fx.text(to.x, to.y - 30, ev.item === 'salts' ? 'REVIVED' : '+', '#9ae0a0', { size: 22 });
         fx.burst(to.x, to.y, '#9ae0a0', 10, 90);
-        return STEP_MS;
+        return STEP();
       }
       case 'guardStance': {
         this.kick(ev.who, { guard: 1 });
@@ -366,10 +399,10 @@ export const combatScreen = {
           }
           // once Mitzi can read them, every attack shows its element and weapon
           if (ev.profile && app.state.notebook.unlocked && !ev.enemy.startsWith('thug')) {
-            fx.text(from.x, from.y - 70, `${SHORT[ev.profile.element]}.${SHORT[ev.profile.type]}`, elementColor(ev.profile.element), { size: 16, rise: 18 });
+            fx.text(from.x, from.y - 70, `${LABEL[ev.profile.element]} ${LABEL[ev.profile.type]}`, elementColor(ev.profile.element), { size: 16, rise: 18 });
           }
-        }, 180);
-        return STEP_MS + 80;
+        }, HIT());
+        return STEP() + 80;
       }
       case 'sweep': {
         this.kick(ev.enemy, { lunge: -1 });
@@ -384,8 +417,8 @@ export const combatScreen = {
               fx.text(to.x, to.y - 40, `−${hit.dmg}`, '#ff8a7a', { size: 24 });
             }
           }
-        }, 180);
-        return STEP_MS + 200;
+        }, HIT());
+        return STEP() + 200;
       }
       case 'enemyGuard':
         this.kick(ev.enemy, { guard: 1 });
@@ -405,13 +438,13 @@ export const combatScreen = {
           delete this.anim[ev.enemy];
           this.sync();
         }, 700);
-        return STEP_MS;
+        return STEP();
       }
       case 'memberDown': {
         const p = this.pos(ev.who);
         fx.text(p.x, p.y - 60, 'DOWN', '#ff7070', { size: 22 });
         audio.sfx('down');
-        return STEP_MS;
+        return STEP();
       }
       case 'summon': {
         audio.sfx('summon');
@@ -420,15 +453,15 @@ export const combatScreen = {
           fx.burst(p.x, p.y, '#6a5a7a', 16, 120);
           this.kick(ev.spawned, { spawn: 1 });
         }, 50);
-        return STEP_MS + 100;
+        return STEP() + 100;
       }
       case 'toll':
         audio.sfx('bell');
         fx.flash('#f4ead8', 300);
-        return STEP_MS + 200;
+        return STEP() + 200;
       case 'tollMuffled':
         audio.sfx('guard');
-        return STEP_MS;
+        return STEP();
       case 'entranced': {
         const p = this.pos(ev.who);
         fx.text(p.x, p.y - 60, 'ENTRANCED', '#f4e0b0', { size: 16 });
@@ -439,7 +472,7 @@ export const combatScreen = {
         this.kick('victoria', { hop: 1 });
         fx.text(p.x, p.y - 70, 'Victoria steps in!', '#ff9aa8', { size: 16 });
         audio.sfx('guard');
-        return STEP_MS + 100;
+        return STEP() + 100;
       }
       case 'assist': {
         const p = this.pos('mitzi');
@@ -514,7 +547,7 @@ export const combatScreen = {
     const card = h(
       'div.foe',
       { style: { left: `${cardX}px`, top: `${cardTop}px` } },
-      h(`div.name${e.identified ? '' : '.unknown'}`, name),
+      h(`div.name${e.identified ? '' : '.unknown'}`, c.phase === 'plan' && !this.playing && e.alive ? h('span.badge', String(this.foeSlots().filter((f) => f.e.alive).findIndex((f) => f.e === e) + 1)) : null, name),
       bar(e.hp, e.maxHp),
     );
     if (e.known && !e.identified) {
@@ -558,7 +591,7 @@ export const combatScreen = {
           { title: info?.hint || '' },
           h('span', INTENT_ICON[view.intent] || '?'),
           h('span', info?.label || view.intent),
-          prof ? h('span.prof', { style: { color: elementColor(prof.element) } }, `${SHORT[prof.element]}.${SHORT[prof.type]}${prof.certain ? '' : '?'}`) : null,
+          prof ? h('span.prof', { style: { color: elementColor(prof.element) } }, `${LABEL[prof.element]} ${LABEL[prof.type]}${prof.certain ? '' : '?'}`) : null,
         ),
       );
     } else {
@@ -597,7 +630,7 @@ export const combatScreen = {
     const card = h(
       'div.hero-card',
       { style: { left: `${x}px`, bottom: 'auto', top: `${y + 4}px`, opacity: down ? 0.55 : 1 } },
-      h('div.name', { style: { color: m.kind === 'merc' ? '#c8bca8' : HEROES[m.id]?.color } }, m.name),
+      h('div.name', { style: { color: m.kind === 'merc' ? '#c8bca8' : HEROES[m.id]?.color } }, this.mode === 'ally' ? h('span.badge', String(this.heroSlots().findIndex((x) => x.id === id) + 1)) : null, m.name),
       bar(m.hp, m.maxHp),
       h('div.hp', down ? 'down' : m.id === 'hestia' ? `${m.hp}/?? · ???` : `${m.hp}/${m.maxHp}`),
       planEl,
@@ -609,13 +642,13 @@ export const combatScreen = {
           type: 'button',
           'aria-label': m.name,
           title: this.mode === 'ally' ? `Use on ${m.name}` : `Plan ${m.name}'s action`,
-          style: { left: `${x}px`, top: `${y - 112}px` },
+          style: { left: `${x}px`, top: `${y - 148}px`, height: '150px' },
           onclick: () => this.selectHero(id),
         }),
       );
     } else if (this.mode === 'ally' && down && this.pending?.item === 'salts') {
       app.ui.append(
-        h('button.hero-hit', { type: 'button', style: { left: `${x}px`, top: `${y - 112}px` }, onclick: () => this.pickAlly(id) }),
+        h('button.hero-hit', { type: 'button', style: { left: `${x}px`, top: `${y - 148}px`, height: '150px' }, onclick: () => this.pickAlly(id) }),
       );
     }
   },
@@ -659,7 +692,11 @@ export const combatScreen = {
     });
     const body = h('div.acts', row);
     if (this.mode === 'target') {
-      body.append(h('div.hint', `Choose a target for ${cap(this.pending.action)} — click an enemy${guide?.target ? ' (the watch points at the Lanky Thug)' : ''}.`));
+      body.append(h('div.hint', `Choose a target for ${cap(this.pending.action)} — click an enemy or press its number${guide?.target ? ' (the watch points at the Lanky Thug)' : ''}. Backspace cancels.`));
+    } else if (this.mode === 'peek') {
+      body.append(h('div.hint', 'Glimpse which enemy? Press its number. Backspace cancels.'));
+    } else if (this.mode === 'examine') {
+      body.append(h('div.hint', 'Examine which enemy? Press its number.'));
     } else if (this.mode === 'item') {
       const items = h('div.row');
       for (const [k, it] of Object.entries(ITEMS)) {
@@ -691,9 +728,10 @@ export const combatScreen = {
         }
         body.append(gr);
       } else {
-        body.append(h('div.hint', guide ? '' : 'Pick an action, then a target. Strike trades blows with attackers; Guard stops them cold.'));
+        body.append(h('div.hint', guide ? '' : 'Pick an order, then a target. Strike trades blows with attackers; Guard stops them cold.'));
       }
     }
+    body.append(h('div.keyhints', c.visionLeft > 0 ? h('span', h('b', 'V'), ' glimpse') : null, h('span', h('b', 'X'), ' examine'), memberGems(m).length && !c.tutorial ? h('span', h('b', 'G'), ' gem') : null, h('span', h('b', 'Tab'), ' next'), h('span', h('b', 'Esc'), ' menu')));
     return h('div.panel.command', who, body, go);
   },
 
@@ -739,7 +777,7 @@ export const combatScreen = {
       rows.push(h('div.faint', 'Nobody here knows how to read them yet.'));
     } else if (!e.human) {
       const p = inf.profile;
-      rows.push(h('div', 'Attacks: ', p.candidates.length ? h('b', p.candidates.map(profileShort).join(' or ')) : h('span.faint', 'unknown'), p.certain ? '' : p.candidates.length ? h('span.faint', ' (notes)') : ''));
+      rows.push(h('div', 'Attacks: ', p.candidates.length ? h('b', p.candidates.map(profileLabel).join(' or ')) : h('span.faint', 'unknown'), p.certain ? '' : p.candidates.length ? h('span.faint', ' (notes)') : ''));
       rows.push(h('div', 'Weak to: ', inf.weak.candidates.length ? h('b.good', inf.weak.candidates.map((x) => LABEL[x]).join(' or ')) : h('span.faint', '?'), ' · Resists: ', inf.resist.candidates.length ? h('b.bad', inf.resist.candidates.map((x) => LABEL[x]).join(' or ')) : h('span.faint', inf.resist.certain ? 'nothing' : '?')));
       if (e.element && e.element !== 'all' && (e.identified && !e.human)) rows.push(h('div', 'Element: ', h(`b.${e.element}`, LABEL[e.element]), h('span.faint', ` — hit it with ${LABEL[COUNTER[e.element]]}`)));
     }
@@ -792,15 +830,15 @@ export const combatScreen = {
     const s = app.state;
     setTimeout(() => (this.leaving = false), 800);
     this.won = false;
-    if (p.story) {
-      s.combat = null;
-      p.onWin();
+    const after = this.c.afterScene;
+    s.combat = null;
+    if (after) {
+      playScene(after);
       return;
     }
-    s.combat = null;
-    const after = afterBattle(s);
-    for (const note of after.notes) app.toast(note, false);
-    if (after.scene) playScene(after.scene);
+    const next = afterBattle(s);
+    for (const note of next.notes) app.toast(note, false);
+    if (next.scene) playScene(next.scene);
     else app.go('trail');
   },
 
@@ -832,7 +870,7 @@ export const combatScreen = {
       let dy = 0;
       let flash = 0;
       if (a) {
-        const p = (now - a.t0) / 360;
+        const p = (now - a.t0) / ANIM();
         if (a.lunge && p < 1) dx = Math.sin(p * Math.PI) * 40 * a.lunge;
         if (a.hop && p < 1) dy = -Math.sin(p * Math.PI) * 16;
         if (a.hurt && p < 0.8) {
@@ -843,10 +881,10 @@ export const combatScreen = {
       const down = slot.m.hp <= 0;
       const bob = down ? 0 : Math.round(Math.sin(t / 520 + slot.x)) * 2;
       ctx.fillStyle = 'rgba(0,0,0,0.35)';
-      ctx.fillRect(slot.x - 24, slot.y - 3, 48, 6);
+      ctx.fillRect(slot.x - 30, slot.y - 3, 60, 6);
       if (this.active === slot.id && c.phase === 'plan' && !this.playing) {
         ctx.fillStyle = 'rgba(232,204,128,0.18)';
-        ctx.fillRect(slot.x - 30, slot.y - 4, 60, 8);
+        ctx.fillRect(slot.x - 36, slot.y - 4, 72, 8);
       }
       const img = memberSprite(slot.m, s.flags);
       if (down) {
@@ -854,18 +892,18 @@ export const combatScreen = {
         ctx.globalAlpha = 0.5;
         ctx.translate(slot.x, slot.y);
         ctx.rotate(-Math.PI / 2);
-        blit(ctx, img, 18, 54, 3, { tint: { color: '#1a1420', amount: 0.6 }, key: `down${slot.id}` });
+        blit(ctx, img, 24, 72, 3, { tint: { color: '#1a1420', amount: 0.6 }, key: `down${slot.id}` });
         ctx.restore();
       } else {
         blit(ctx, img, slot.x + dx, slot.y + dy + bob, 3, { flash, key: slot.id });
         if (a?.guard && now - a.t0 < 1200) {
           ctx.strokeStyle = `rgba(150,190,230,${0.6 * (1 - (now - a.t0) / 1200)})`;
           ctx.lineWidth = 3;
-          ctx.strokeRect(slot.x - 30, slot.y - 112, 60, 112);
+          ctx.strokeRect(slot.x - 36, slot.y - 148, 72, 148);
         }
         if (slot.m.exposed) {
           ctx.fillStyle = elementColor(slot.m.exposed);
-          ctx.fillRect(slot.x - 3, slot.y - 124 + Math.round(Math.sin(t / 200) * 2), 6, 6);
+          ctx.fillRect(slot.x - 3, slot.y - 156 + Math.round(Math.sin(t / 200) * 2), 6, 6);
         }
       }
     }
@@ -878,7 +916,7 @@ export const combatScreen = {
       let flash = 0;
       let alpha = 1;
       if (a) {
-        const p = (now - a.t0) / 360;
+        const p = (now - a.t0) / ANIM();
         if (a.lunge && p < 1) dx = Math.sin(p * Math.PI) * 40 * a.lunge;
         if (a.hurt && p < 0.8) {
           flash = 1 - p / 0.8;
@@ -922,7 +960,7 @@ export const combatScreen = {
       if (!fs) continue;
       ctx.strokeStyle = p.action === 'guard' ? 'rgba(140,180,230,0.75)' : p.action === 'study' ? 'rgba(190,170,240,0.75)' : 'rgba(240,140,130,0.75)';
       const x0 = hs.x;
-      const y0 = hs.y - 120;
+      const y0 = hs.y - 150;
       const x1 = fs.x;
       const y1 = fs.y - this.foeHeight(fs.e) - 6;
       ctx.beginPath();
@@ -941,17 +979,26 @@ export const combatScreen = {
       }
       return;
     }
-    if (this.playing || this.c.phase !== 'plan') return;
+    if (this.playing) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        this.skipAhead();
+      }
+      return;
+    }
+    if (this.c.phase !== 'plan') return;
     const s = app.state;
+    const k = e.key.toLowerCase();
     if (e.key === 'Enter') {
       e.preventDefault();
       this.endTurn();
       return;
     }
-    if (e.key === 'Escape' || e.key === 'Backspace') {
-      if (this.mode) {
-        this.mode = null;
-        this.pending = null;
+    if (e.key === 'Backspace') {
+      e.preventDefault();
+      if (this.mode) this.escape();
+      else if (this.active) {
+        clearPlan(s, this.active);
         this.sync();
       }
       return;
@@ -960,14 +1007,47 @@ export const combatScreen = {
       e.preventDefault();
       const living = livingMembers(s);
       const i = living.findIndex((m) => memberId(m) === this.active);
-      const next = living[(i + 1) % living.length];
+      const next = living[(i + (e.shiftKey ? -1 : 1) + living.length) % living.length];
       this.selectHero(memberId(next));
+      return;
+    }
+    if (k === 'v') {
+      if (this.c.visionLeft <= 0) return app.toast('The watch has shown all it can this round.', false);
+      this.mode = this.mode === 'peek' ? null : 'peek';
+      this.sync();
+      return;
+    }
+    if (k === 'x') {
+      this.mode = this.mode === 'examine' ? null : 'examine';
+      this.hideTip();
+      this.sync();
+      return;
+    }
+    if (k === 'g') {
+      this.cycleGem();
       return;
     }
     const n = parseInt(e.key, 10);
     if (!n) return;
+    const foes = this.foeSlots().filter((f) => f.e.alive);
+    if (this.mode === 'peek') {
+      if (foes[n - 1]) this.doPeek(foes[n - 1].e.uid);
+      this.mode = null;
+      this.sync();
+      return;
+    }
+    if (this.mode === 'examine') {
+      const f = foes[n - 1];
+      if (f) {
+        const el = app.ui.querySelectorAll('.foe-hit')[n - 1];
+        this.mode = null;
+        this.sync();
+        const hit = app.ui.querySelectorAll('.foe-hit')[n - 1] || el;
+        if (hit) this.showTip(f.e, { currentTarget: hit });
+      }
+      return;
+    }
     if (this.mode === 'target') {
-      const foes = this.foeSlots().filter((f) => f.e.alive);
       if (foes[n - 1]) this.target(foes[n - 1].e.uid);
       return;
     }
@@ -981,10 +1061,26 @@ export const combatScreen = {
       if (heroes[n - 1]) this.pickAlly(heroes[n - 1].id);
       return;
     }
+    this.hideTip();
     const m = memberById(s, this.active);
     if (!m) return;
     const acts = actionsFor(s, m);
     if (acts[n - 1]) this.choose(acts[n - 1].id);
+  },
+
+  cycleGem() {
+    const s = app.state;
+    const m = memberById(s, this.active);
+    if (!m) return;
+    const gems = [null, ...memberGems(m)];
+    if (gems.length < 2) return;
+    if (s.mana < RULES.imbueCost) return app.toast('Not enough mana to imbue.', false);
+    this.gemChoice ||= {};
+    const id = memberId(m);
+    const i = gems.indexOf(this.gemChoice[id] || null);
+    this.gemChoice[id] = gems[(i + 1) % gems.length];
+    audio.sfx('element');
+    this.sync();
   },
 };
 

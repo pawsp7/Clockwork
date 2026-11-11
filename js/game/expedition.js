@@ -124,12 +124,20 @@ export function afterBattle(state) {
 
 export function openCache(state) {
   const d = dungeonOf(state);
+  const node = currentNode(state);
   const loot = { supplies: 10 + int(0, 6), coins: int(4, 10) * d.tier, materials: chance(0.6) ? 1 : 0, gem: chance(0.3) ? pick(ELEMENTS) : null };
   state.supplies = Math.min(RULES.supplyMax, state.supplies + loot.supplies);
   state.coins += loot.coins;
   state.materials += loot.materials;
   state.expedition.materials += loot.materials;
   if (loot.gem) state.gems[loot.gem] += 1;
+  if (node?.page) {
+    state.lore ||= { found: [] };
+    if (!state.lore.found.includes(node.page)) {
+      state.lore.found.push(node.page);
+      loot.page = node.page;
+    }
+  }
   return loot;
 }
 

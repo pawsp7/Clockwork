@@ -45,6 +45,7 @@ export function createState() {
     items: { salve: 2, panacea: 0, salts: 1 },
     gems: { fire: 0, water: 0, earth: 0, electric: 0 },
     notebook: { unlocked: false, traits: {}, species: {}, known: {}, fresh: [] },
+    lore: { found: [] },
     quests: { board: [], active: [], completed: 0 },
     flags: {
       shortHair: false,
@@ -167,6 +168,16 @@ export function saveGame(state, slot = 'auto') {
   }
 }
 
+/** Fill in fields added since a save was written. */
+export function migrate(state) {
+  const fresh = createState();
+  for (const k of Object.keys(fresh)) if (state[k] === undefined) state[k] = fresh[k];
+  state.lore ||= { found: [] };
+  state.notebook.known ||= {};
+  state.flags = { ...fresh.flags, ...state.flags };
+  return state;
+}
+
 export function loadGame(slot = 'auto') {
   const ls = storage();
   if (!ls) return null;
@@ -175,10 +186,36 @@ export function loadGame(slot = 'auto') {
     if (!raw) return null;
     const data = JSON.parse(raw);
     if (!data?.state || data.state.version !== SAVE_VERSION) return null;
+    migrate(data.state);
     return data;
   } catch {
     return null;
   }
+}
+
+/** Save with a human-readable label (where you are, when). */
+export function saveSlot(state, slot, label) {
+  const ls = storage();
+  if (!ls) return false;
+  try {
+    ls.setItem(`${KEY}.${slot}`, JSON.stringify({ at: Date.now(), label, state }));
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export function listSaves() {
+  return ['auto', 'slot1', 'slot2', 'slot3'].map((slot) => {
+    const d = loadGame(slot);
+    return { slot, at: d?.at || null, label: d?.label || null, chapter: d?.state?.chapter ?? null };
+  });
+}
+
+export function latestSave() {
+  return listSaves()
+    .filter((x) => x.at)
+    .sort((a, b) => b.at - a.at)[0] || null;
 }
 
 export function clearSaves() {
