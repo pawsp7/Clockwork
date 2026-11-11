@@ -1,4 +1,5 @@
 import { makeCanvas, hexToRgba } from './pixel.js';
+import { charonPortrait as charonPortraitNew } from './charon.js';
 
 /**
  * Character art from references/Art, stored at native resolution in assets/art.
@@ -201,7 +202,7 @@ function basePortrait(who, flags) {
     case 'alice':
       return alicePortrait(flags);
     case 'charon':
-      return charonPortrait();
+      return charonPortraitNew(null);
     default:
       return null;
   }
@@ -240,33 +241,6 @@ function alicePortrait(flags = {}) {
         { x: 20, y: 17, rows: ['k', ' k', '  k', '   kk', '     kk', '       kk', '         kk', '           kk', '             kk'], pal: { k: PATCH } },
       ]);
     }
-    return c;
-  });
-}
-
-function charonPortrait() {
-  return memo('p|charon', () => {
-    let c = remap(ART.victoria_portrait, [
-      // lips → muted rose
-      { test: (h, s, l, x, y) => y >= 34 && y <= 37 && x >= 29 && x <= 35 && s > 0.3 && between(h, 330, 20), ramp: ROSE_LIP, lo: 0.15, hi: 0.6 },
-      // jewel → gold coin
-      { test: (h, s, l, x, y) => y >= 44 && x >= 26 && x <= 38 && s > 0.35 && between(h, 330, 20), ramp: GOLD, lo: 0.1, hi: 0.55 },
-      // eyes → green
-      { test: (h, s, l, x, y) => y >= 24 && y <= 31 && x >= 23 && x <= 42 && between(h, 200, 260) && s > 0.08, ramp: GREEN_EYE, lo: 0.05, hi: 0.8 },
-      // hair, headband, rose → brown hair
-      { test: (h, s, l, x, y) => (between(h, 320, 30) && s > 0.2 && l < 0.6) || (y < 26 && l < 0.3), ramp: BROWN_HAIR, lo: 0.0, hi: 0.55 },
-      // black dress → brown coat
-      { test: (h, s, l, x, y) => y >= 42 && l < 0.35, ramp: BROWN_COAT, lo: 0.0, hi: 0.35 },
-    ]);
-    // the head mirror
-    c = patch(c, [
-      {
-        x: 23,
-        y: 15,
-        rows: ['  mmmm  ', ' mllllm ', 'mlwwllkm', 'mlwlllkm', 'mlllllkm', 'mkllllkm', ' mkkkkm ', '  mmmm  '],
-        pal: { m: '#6a7278', l: '#c8d0d6', k: '#9aa4ac', w: '#ffffff' },
-      },
-    ]);
     return c;
   });
 }
@@ -327,14 +301,8 @@ export function refPortrait(who, flags = {}, mood = null, blink = false) {
   const fkey = who === 'alice' ? `${flags.shortHair ? 's' : 'l'}${flags.eyepatch ? 'p' : ''}` : '';
   const m = blink && mood !== 'happy' ? 'blink' : mood;
   return memo(`pm|${who}|${fkey}|${m || ''}`, () => {
-    if (who === 'hestia') {
-      if (m === 'blink') return frame('hestia_blink', 2, 64);
-      if (m === 'angry') {
-        // red eyes she only shows when nobody is watching
-        const red = remap(base, [{ test: (h, s, l, x, y) => y >= 21 && y <= 28 && x >= 20 && x <= 43 && s < 0.12 && l > 0.25 && l < 0.85, ramp: ['#5a0a12', '#a01c28', '#e04048', '#ff9a90'], lo: 0.25, hi: 0.85 }]);
-        return moodPatch('hestia', red, 'angry');
-      }
-    }
+    if (who === 'hestia') return hestiaMood(m);
+    if (who === 'charon') return charonPortraitNew(m);
     if (who === 'alice' && flags.eyepatch && m) {
       // keep the patch on top of any mood
       return alicePortraitMood(flags, m);
@@ -502,4 +470,67 @@ export function refSprite(id, flags = {}, mood = null, walkFrame = null) {
 
 export function artReady() {
   return !!ART.alice_sprite;
+}
+
+/**
+ * Hestia's moods, built from her own blink/talk frames:
+ * frame 0 open eyes, frame 1 half-lidded, frame 2 closed; frames 1–3 have an open mouth.
+ */
+function hestiaMood(mood) {
+  const f = (i) => frame('hestia_blink', i, 64);
+  const c = makeCanvas(64, 64);
+  const ctx = c.getContext('2d');
+  ctx.drawImage(f(0), 0, 0);
+  const eyesFrom = mood === 'blink' || mood === 'happy' ? 2 : mood === 'sad' ? 1 : 0;
+  ctx.clearRect(18, 19, 28, 10);
+  ctx.drawImage(f(eyesFrom), 18, 19, 28, 10, 18, 19, 28, 10);
+  if (mood === 'shock') {
+    ctx.clearRect(26, 34, 12, 5);
+    ctx.drawImage(f(1), 26, 34, 12, 5, 26, 34, 12, 5);
+  }
+  const img = ctx.getImageData(0, 0, 64, 64);
+  const d = img.data;
+  const at = (x, y) => (y * 64 + x) * 4;
+  const set = (x, y, hex) => {
+    const [r, g, b] = hexToRgba(hex);
+    const i = at(x, y);
+    d[i] = r;
+    d[i + 1] = g;
+    d[i + 2] = b;
+    d[i + 3] = 255;
+  };
+  const SKIN = '#ffeee0';
+  if (mood === 'angry') {
+    // the red eyes she only shows when nobody is watching
+    for (let y = 23; y <= 27; y++) {
+      for (let x = 20; x <= 43; x++) {
+        const i = at(x, y);
+        const [r, g, b] = [d[i], d[i + 1], d[i + 2]];
+        const dark = r < 40 && g < 40 && b < 40;
+        const grey = Math.abs(r - 0xad) < 8 && Math.abs(g - 0xaa) < 8;
+        const white = r > 245 && g > 245 && b > 245;
+        if (y === 23 && (dark || grey || white)) set(x, y, '#000000'); // lids drop: a glare
+        else if (dark) set(x, y, y >= 26 ? '#8a0c16' : '#5a0610');
+        else if (grey) set(x, y, '#ff3a40');
+        else if (white) set(x, y, '#ffb4a8');
+      }
+    }
+    // a hard, thin mouth
+    for (let x = 29; x <= 34; x++) set(x, 35, '#c8603a');
+    for (let x = 30; x <= 33; x++) set(x, 36, SKIN);
+  } else if (mood === 'happy') {
+    // her serene smile — eyes closed, like a door politely shut
+    for (let x = 30; x <= 33; x++) set(x, 35, SKIN);
+    set(29, 35, '#fac59b');
+    set(34, 35, '#fac59b');
+    for (let x = 30; x <= 33; x++) set(x, 36, '#e98e42');
+  } else if (mood === 'sad') {
+    for (let x = 29; x <= 34; x++) set(x, 35, SKIN);
+    for (let x = 30; x <= 33; x++) set(x, 35, '#f2ae76');
+    set(29, 36, '#f2ae76');
+    set(34, 36, '#f2ae76');
+    for (let x = 30; x <= 33; x++) set(x, 36, SKIN);
+  }
+  ctx.putImageData(img, 0, 0);
+  return c;
 }
