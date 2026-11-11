@@ -3,6 +3,7 @@ import { FxLayer, SW, SH } from '../art/fx.js';
 import { audio } from '../core/audio.js';
 import { saveGame, latestSave } from '../game/state.js';
 import { openMenu, moveFocus } from './sheets/menu.js';
+import { debugEnabled, openDebug } from './sheets/debug.js';
 
 /**
  * App shell: owns the stage, the render loop, screen switching, modal sheets and toasts.
@@ -158,6 +159,12 @@ export const app = {
   onKey(e) {
     if (this.transitioning) {
       e.preventDefault();
+      return;
+    }
+    if (e.key === '`' && debugEnabled()) {
+      e.preventDefault();
+      if (this.sheet) this.closeSheet(true);
+      openDebug();
       return;
     }
     if (e.key === 'Escape') {

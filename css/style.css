@@ -1759,3 +1759,34 @@ button.beast.selected {
 .title-menu {
   bottom: 30px;
 }
+
+/* ─── Debug ────────────────────────────────────────────────────── */
+
+body.debug-on #stage::after {
+  content: 'DEBUG';
+  position: absolute;
+  right: 6px;
+  bottom: 4px;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  color: #e07070;
+  opacity: 0.7;
+  pointer-events: none;
+}
+.debug-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px 14px;
+}
+.debug-stage {
+  text-align: left;
+  white-space: normal;
+}
+.debug-select {
+  font-family: var(--ui);
+  font-size: 14px;
+  background: var(--panel-2);
+  color: var(--ink);
+  border: 2px solid var(--edge);
+  padding: 4px 6px;
+}

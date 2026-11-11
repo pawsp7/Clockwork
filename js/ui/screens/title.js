@@ -8,6 +8,7 @@ import { newGame, continueGame } from '../flow.js';
 import { openSettings, confirmSheet } from '../sheets/settings.js';
 import { openLoad, openControls } from '../sheets/menu.js';
 import { openMemories } from '../sheets/memories.js';
+import { debugEnabled, openDebug } from '../sheets/debug.js';
 
 const CAST = [
   { id: 'victoria', x: 104 },
@@ -30,6 +31,7 @@ export const titleScreen = {
       }, { cls: has ? '' : 'primary', key: has ? null : '↵' }),
       has ? btn('Load', () => openLoad()) : null,
       btn('Memories', () => openMemories()),
+      debugEnabled() ? btn('Debug: jump to stage', () => openDebug(), { key: '`' }) : null,
       h('div.row', btn('Settings', () => openSettings(), { cls: 'grow' }), btn('Controls', () => openControls(), { cls: 'grow' })),
     );
     app.ui.append(

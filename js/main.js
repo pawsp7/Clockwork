@@ -1,5 +1,6 @@
 import { app } from './ui/app.js';
 import { loadArt } from './art/refart.js';
+import { initDebug } from './ui/sheets/debug.js';
 import { titleScreen } from './ui/screens/title.js';
 import { storyScreen } from './ui/screens/story.js';
 import { townScreen } from './ui/screens/town.js';
@@ -18,6 +19,7 @@ app.register('ending', endingScreen);
 app.register('gameover', gameOverScreen);
 
 async function boot() {
+  initDebug();
   app.init();
   const art = loadArt();
   try {

@@ -4,6 +4,7 @@ import { listSaves, saveSlot } from '../../game/state.js';
 import { DUNGEONS } from '../../data/world.js';
 import { openSettings, confirmSheet } from './settings.js';
 import { loadSlot } from '../flow.js';
+import { debugEnabled, openDebug } from './debug.js';
 
 /** Where the player is, for save labels. */
 export function placeLabel(state) {
@@ -86,6 +87,7 @@ export function openMenu(start = 'main') {
         ['Load game', () => ((view = 'load'), app.refreshSheet()), {}],
         ['Settings', () => openSettings(), {}],
         ['Controls', () => ((view = 'keys'), app.refreshSheet()), {}],
+        ...(debugEnabled() ? [['Debug', () => openDebug(), {}]] : []),
         ['Quit to title', () => confirmSheet('Quit to title?', 'Anything since your last save will be lost. (The game autosaves in town and between steps on the trail.)', () => app.go('title'), { yesLabel: 'Quit' }), {}],
       ];
       body = h(
