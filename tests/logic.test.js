@@ -250,3 +250,29 @@ for (const policy of ['good', 'bad', 'random']) {
     }
   });
 }
+
+test('debug: every stage builds a playable state', async () => {
+  const { STAGES, stageState, bossNodeIndex } = await import('../js/game/debug.js');
+  const { fight } = await import('./driver.js');
+  const { startBattle } = await import('../js/game/expedition.js');
+  seed(77);
+  for (const st of STAGES) {
+    for (const good of [true, false]) {
+      const { state, go } = stageState(st.id, { good });
+      assert.ok(go.to, st.id);
+      if (go.to === 'dungeon' || go.to === 'boss') {
+        assert.ok(state.unlocked[go.dungeon] && !state.cleared[go.dungeon], `${st.id} unlocked`);
+        assert.ok(state.roster.includes('mitzi'), `${st.id} has the sisters`);
+      }
+      if (go.to === 'boss' && good) {
+        startExpedition(state, go.dungeon);
+        state.expedition.node = bossNodeIndex(go.dungeon);
+        startBattle(state);
+        assert.ok(state.combat.enemies[0].isBoss);
+        assert.ok(fight(state, {}), `${st.id} boss is winnable`);
+      }
+    }
+  }
+  assert.equal(stageState('last_night').state.pendingRest, 'last_night');
+  assert.equal(stageState('town_3', { good: false }).state.flags.mitziAtk, 4);
+});

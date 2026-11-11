@@ -909,3 +909,18 @@ export function allFeatures() {
 }
 
 export { MONSTERS, MONSTER_BY_ID, rand };
+
+/** Debug: end the current fight as a victory (rewards and all). */
+export function forceWin(state) {
+  const c = state.combat;
+  if (!c || c.phase !== 'plan') return false;
+  for (const e of c.enemies) {
+    if (!e.alive) continue;
+    e.hp = 0;
+    e.alive = false;
+    onKill(state, e);
+  }
+  state.supplies = Math.max(1, state.supplies);
+  finishRound(state, () => {});
+  return c.phase === 'won';
+}

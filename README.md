@@ -73,6 +73,14 @@ The character art for Alice, Mitzi, Victoria and Hestia comes from [`references/
 
 ## Development
 
+**Debug mode.** Open the game with `?debug` in the URL, e.g. <https://pawsp7.github.io/Clockwork/?debug>. Then press **`** (backtick), or use the Esc menu or the title screen, to:
+- jump straight to any stage: each town visit, each dungeon's entrance or guardian, the last night, the White Ox, or the ending (as a good or a bad run);
+- use cheats: win the current fight, skip to the guardian, heal, fill supplies, add coins and gems, identify every creature, reveal the Codex;
+- replay any story scene with the current save.
+
+The setting is remembered in your browser; `?debug=0` turns it off.
+
+
 ```bash
 npm test          # rules, story wiring, and full headless playthroughs (good / bad / random choices)
 npm run sim       # balance: supplies left per dungeon over 20 seeded runs
