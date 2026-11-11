@@ -115,9 +115,9 @@ for y in (86, 93):
     fig.put(40, y, GOLD[1]); fig.put(56, y, GOLD[1]); fig.put(40, y - 1, GOLD[2]); fig.put(56, y - 1, GOLD[2])
 
 # neck, shirt collar, tie
-fig.poly([(42, 56), (54, 56), (54, 70), (42, 70)],
+fig.poly([(44, 56), (52, 56), (52, 70), (44, 70)],
          lambda x, y: SKIN[2] if y < 63 else (SKIN[1] if x > 50 else SKIN[0]))
-for x in range(42, 55):
+for x in range(43, 54):
     for y in range(56, 63):
         if y < 61:
             fig.put(x, y, SKIN[2] if y < 59 else SKIN[1])

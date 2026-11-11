@@ -112,9 +112,9 @@ def dress_col(x, y):
 fig.poly([(10, 96), (14, 84), (24, 76), (38, 72), (58, 72), (72, 76), (82, 84), (86, 96)], dress_col)
 
 # neck
-fig.poly([(42, 56), (54, 56), (55, 74), (41, 74)],
+fig.poly([(44, 56), (52, 56), (53, 70), (55, 74), (41, 74), (43, 70)],
          lambda x, y: SKIN[2] if y < 64 and x > 43 else (SKIN[1] if x > 51 else SKIN[0]))
-for x in range(42, 55):      # shadow under the jaw
+for x in range(43, 54):      # shadow under the jaw
     for y in range(58, 64):
         if y < 62:
             fig.put(x, y, SKIN[2] if y < 60 else SKIN[1])

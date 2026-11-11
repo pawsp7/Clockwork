@@ -85,7 +85,7 @@ for x in range(30, 67):                      # scalloped neckline
     y = 81 + round(1.5 * abs(math.sin((x - 30) * 0.52))) + (2 if 42 < x < 54 else 0)
     fig.put(x, y, LACE[0]); fig.put(x, y - 1, LACE[2] if x % 3 == 0 else LACE[0])
 neck(fig, SKIN, y1=76)
-for x in range(42, 55):                      # choker and its red gem
+for x in range(44, 53):                      # choker and its red gem
     fig.put(x, 67, LACE[0]); fig.put(x, 68, LACE[2] if x % 2 else LACE[0])
 fig.stamp([".a.", "bcb", "dcd", ".d."], {'a': RED[3], 'b': RED[2], 'c': RED[1], 'd': RED[0]}, 47, 69)
 

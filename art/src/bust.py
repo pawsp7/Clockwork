@@ -20,13 +20,23 @@ def face_hw(y, top_w=14.4, jaw=42, bottom=61):
 def face(fig, SKIN, BLUSH, top=26, bottom=61, blush_y=50):
     """Lit from the upper left, in flat bands: a shadow down the right side and
     under the jaw, a darker line along the jaw, a lit cheek on the left."""
+    def inside(x, y):
+        return top <= y <= bottom and abs(x + 0.5 - CX) <= face_hw(y)
+
     def col(x, y):
         hw = face_hw(y)
         dx = x - CX
         k = 0
-        if dx > hw - 5 or (y > 56 and abs(dx) > hw - 3): k = 1
-        if dx > hw - 2 or (y > 59 and abs(dx) > hw - 1.5): k = 2
-        if y >= bottom - 1: k = max(k, 1)
+        # shadow side: a cel-shaded band that widens toward the jaw, so the
+        # cheek reads as round
+        band = 3.5 + max(0, y - 38) * 0.28
+        if dx > hw - band: k = 1
+        if dx > hw - band * 0.45 and y > 30: k = 2
+        # shadow following the jaw and chin, deeper on the shadow side
+        if y > 48 and not inside(x, y + 3): k = max(k, 1)
+        if y > 50 and not inside(x, y + 1) and dx > -6: k = 2
+        # where the hair meets the face on the lit side
+        if dx < -hw + 1.2 and y < 52: k = max(k, 1)
         return SKIN[k]
     pts = [(CX - face_hw(y), y) for y in range(top, bottom + 1)] + \
           [(CX + face_hw(y) + 1, y) for y in range(bottom, top - 1, -1)]
@@ -44,6 +54,7 @@ def face(fig, SKIN, BLUSH, top=26, bottom=61, blush_y=50):
             for y in (blush_y, blush_y + 1):
                 if not (y == blush_y + 1 and abs(x - (CX + side * 10)) == 2):
                     fig.put(x, y, BLUSH)
+        fig.put(CX + side * 10 - 1, blush_y, blend(BLUSH, (255, 255, 255), 0.65))   # shine
 
 
 # Eyes, 11 wide x 9 tall, drawn for the viewer's left eye and mirrored.
@@ -103,7 +114,7 @@ def draw_eyes(fig, shape, iris, lash, lid, y=38, lx=34, rx=52, pupil=None, white
     fig.stamp(rows, pal, rx, y, mirror=True)
 
 
-def neck(fig, SKIN, y0=56, y1=74, x0=42, x1=54):
+def neck(fig, SKIN, y0=56, y1=74, x0=44, x1=52):
     fig.poly([(x0, y0), (x1, y0), (x1 + 1, y1), (x0 - 1, y1)],
              lambda x, y: SKIN[1] if x > x1 - 3 else SKIN[0])
     for x in range(x0 - 1, x1 + 2):

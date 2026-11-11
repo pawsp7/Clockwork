@@ -89,7 +89,7 @@ neck(fig, SKIN)
 for i, x in enumerate(range(34, 63, 3)):        # ruffled collar
     fig.ellipse(x + 1, 76 + (1 if i % 2 else 0), 3.2, 3.6,
                 lambda xx, yy, nx, ny: FRILL[0] if ny > 0.4 else (FRILL[1] if nx > 0.2 else FRILL[2]))
-for x in range(42, 55):                         # choker
+for x in range(44, 53):                         # choker
     fig.put(x, 68, BAND[0]); fig.put(x, 69, BAND[1])
 fig.stamp([".a.", "abc", "bcd", ".b."], {'a': GEM[3], 'b': GEM[1], 'c': GEM[2], 'd': GEM[0]}, 47, 69)
 for x0 in (44, 52):                             # drawstrings
