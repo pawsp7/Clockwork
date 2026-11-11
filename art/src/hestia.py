@@ -51,14 +51,14 @@ def horn(side):
     for i in range(120):
         t = i / 119
         x = CX + side * (11 + 21 * math.sin(t * math.pi * 0.62) - 3 * t * t)
-        y = 30 - 27 * t ** 1.15
+        y = 34 - 27 * t ** 1.15
         r = 5.2 * (1 - t) ** 0.8 + 0.5
         shadow.ellipse(x, y, r, r, SHADOW)
 
 SHADOW = hx('0d0a11')
 for side in (-1, 1):
     horn(side)
-shadow.ellipse(CX, 38, 26, 27, SHADOW)
+shadow.ellipse(CX, 42, 26, 27, SHADOW)
 shadow.poly([(8, 96), (16, 70), (80, 70), (88, 96)], SHADOW)
 for y in range(H):
     for x in range(W):
@@ -180,6 +180,8 @@ fig.stamp(["..g..", ".gGg.", "gGHGg", ".gGg.", "..g..", "..g..", "..G..", "..g..
 fig.stamp([".g.", "gGg", ".G.", ".g.", ".g."], {'g': GOLD[1], 'G': GOLD[2]}, 47, 80)
 
 # outline the figure against the wall
+from bust import shorten_neck
+shorten_neck(fig)
 fig.outline(HAIR_LINE)
 
 # ── compose ──────────────────────────────────────────────────────────────

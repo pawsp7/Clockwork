@@ -190,6 +190,8 @@ def coin_col(x, y, nx, ny):
 fig.ellipse(CNX, CNY, 5.5, 5.5, coin_col)
 fig.stamp([".k.", "k.k", ".k."], {'k': GOLD[0]}, CNX - 1, CNY - 1)   # stamped mark
 
+from bust import shorten_neck
+shorten_neck(fig)
 fig.outline(HAIR_LINE)
 
 # ── compose ──────────────────────────────────────────────────────────────

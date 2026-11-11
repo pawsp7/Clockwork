@@ -157,6 +157,8 @@ fig.stamp([
     "...kgk.....",
 ], BOW, 64, 30)
 
+from bust import shorten_neck
+shorten_neck(fig)
 res = finish(bg, fig, LINE, rim=lambda x, y: x > CX, rim_col=hx('ffb0d0'), rim_side=1)
 res.save(f'{OUT}/mitzi_portrait.png')
 res.save(f'{OUT}/mitzi_portrait_8x.png', 8)

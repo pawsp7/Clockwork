@@ -150,6 +150,8 @@ for a in range(0, 360, 90):
     fig.put(round(WX + math.cos(math.radians(a)) * 4.6), round(WY + math.sin(math.radians(a)) * 4.6), hx('8a7a60'))
 fig.put(WX, WY - 8, GOLD[2]); fig.put(WX, WY - 9, GOLD[1])
 
+from bust import shorten_neck
+shorten_neck(fig)
 res = finish(bg, fig, LINE, rim=lambda x, y: y > 40, rim_col=hx('ffb070'), rim_side=1)
 # the dial's glow spilling over her blouse
 for y in range(H):

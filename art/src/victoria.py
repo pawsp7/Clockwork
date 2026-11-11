@@ -138,6 +138,8 @@ for y in range(36, 50):
     fig.put(26, y, hx('7a7884') if y % 3 else hx('b0aebb'))
 fig.put(26, 50, hx('d0ced8')); fig.put(25, 51, hx('7a7884')); fig.put(27, 51, hx('7a7884'))
 
+from bust import shorten_neck
+shorten_neck(fig)
 res = finish(bg, fig, LINE, rim=lambda x, y: y > 30, rim_col=hx('e07050'), rim_side=-1)
 res.save(f'{OUT}/victoria_portrait.png')
 res.save(f'{OUT}/victoria_portrait_8x.png', 8)

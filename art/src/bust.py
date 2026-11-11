@@ -149,6 +149,16 @@ def wavy_lock(fig, col, x_top, y_top, y_bot, w_top, w_bot, amp, freq, ph, tilt=0
             fig.put(x, y, col(x, y, ph))
 
 
+def shorten_neck(fig, rows=4, at=62):
+    """Take `rows` rows out of the neck (starting at y=`at`, just under the
+    chin) and move everything above down to close the gap: the head drops
+    onto the shoulders, and nothing else changes shape."""
+    for y in range(at + rows - 1, rows - 1, -1):
+        fig.px[y] = fig.px[y - rows]
+    for y in range(rows):
+        fig.px[y] = [None] * fig.w
+
+
 def finish(bg, fig, outline, rim=None, rim_col=None, rim_side=-1, out=None):
     fig.outline(outline)
     res = Layer(W, H)
