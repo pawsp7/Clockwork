@@ -69,7 +69,7 @@ Everything can be played with the mouse or with the keyboard alone.
 
 ## Art
 
-The character art for Alice, Mitzi, Victoria and Hestia comes from [`references/Art`](./references/Art), stored at native size in `assets/art`. Alice's portrait, Charon, and Hestia's sprite are built from those same pixels by re-colouring and patching, so the whole cast shares one hand. Creatures, backdrops and the event illustrations are painted in code.
+The character art for Alice, Mitzi, Victoria and Hestia comes from [`references/Art`](./references/Art), stored at native size in `assets/art`. Alice's portrait and Hestia's sprite are built from those same pixels by re-colouring and patching, and Hestia's expressions come from the frames of her own animation. Charon's portrait is painted in code to match (`js/art/charon.js`), as are the creatures, backdrops and event illustrations. `dev/moods.html` previews every expression.
 
 ## Development
 

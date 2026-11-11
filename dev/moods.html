@@ -1,0 +1,13 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><style>body{margin:0;background:#2a2230}canvas{image-rendering:pixelated}</style></head>
+<body><canvas id="c" width="1600" height="640"></canvas>
+<script type="module">
+import { loadArt } from '../js/art/refart.js';
+import { portrait } from '../js/art/portraits.js';
+import { blit } from '../js/art/pixel.js';
+await loadArt('../assets/art/');
+const ctx = document.getElementById('c').getContext('2d');
+ctx.fillStyle = '#2a2230'; ctx.fillRect(0,0,1600,640);
+const ps = [['hestia',null],['hestia','happy'],['hestia','sad'],['hestia','angry'],['hestia','shock'],['charon',null],['charon','happy'],['charon','sad'],['charon','angry'],['charon','shock']];
+ps.forEach(([w,m],i)=>blit(ctx, portrait(w,{},m), 160+(i%5)*310, 300+Math.floor(i/5)*320, 4));
+</script></body></html>
