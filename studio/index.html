@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0c0a0e" />
+  <meta name="description" content="Clockwork Studio: draw and edit pixel art in Clockwork's own colours. Layers, frames, onion skin, palettes from the game's art, and PNG, GIF, sprite sheet and Paint Shop Pro export." />
+  <title>Clockwork Studio</title>
+  <script>
+    // relative paths need the folder's trailing slash (/studio → /studio/)
+    if (!/\/$|\.html$/.test(location.pathname)) location.replace(location.pathname + '/' + location.search + location.hash);
+  </script>
+  <link rel="preload" href="../assets/fonts/PixelifySans.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="stylesheet" href="./studio.css" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' shape-rendering='crispEdges'%3E%3Crect x='5' y='0' width='6' height='2' fill='%23c8a860'/%3E%3Crect x='2' y='3' width='12' height='12' fill='%23c8a860'/%3E%3Crect x='3' y='4' width='10' height='10' fill='%23f2eee8'/%3E%3Crect x='7' y='5' width='2' height='5' fill='%23241e28'/%3E%3Crect x='8' y='9' width='3' height='1' fill='%23241e28'/%3E%3C/svg%3E" />
+</head>
+<body>
+  <header class="top">
+    <a class="brand" id="brand" href="../" title="Back to the game"></a>
+    <nav class="menubar" id="menubar" aria-label="Menu"></nav>
+    <div class="tabs" id="tabs" role="tablist" aria-label="Open drawings"></div>
+    <button class="text-btn small side-toggle" id="sideToggle" aria-controls="side" title="Colours, palette, layers"></button>
+  </header>
+  <div class="options" id="options" aria-label="Tool options"></div>
+  <main class="main">
+    <nav class="tools" id="tools" aria-label="Tools"></nav>
+    <section class="work">
+      <div class="canvas-wrap" id="canvasWrap">
+        <canvas id="view" tabindex="0" aria-label="Drawing canvas"></canvas>
+        <div class="welcome" id="welcome" hidden></div>
+        <div class="drop-hint">Drop to open</div>
+      </div>
+      <footer class="status" id="status" aria-live="off"></footer>
+    </section>
+    <aside class="side" id="side" aria-label="Panels">
+      <button class="icon-btn side-close" id="sideClose" title="Close panels" aria-label="Close panels"></button>
+      <section class="panel" id="colorPanel">
+        <h2 class="panel-head" aria-expanded="true">Colour</h2>
+        <div class="panel-body"></div>
+      </section>
+      <section class="panel" id="palettePanel">
+        <h2 class="panel-head" aria-expanded="true">Palette</h2>
+        <div class="panel-body"></div>
+      </section>
+      <section class="panel" id="previewPanel">
+        <h2 class="panel-head" aria-expanded="true">Preview</h2>
+        <div class="panel-body"></div>
+      </section>
+      <section class="panel" id="layersPanel">
+        <h2 class="panel-head" aria-expanded="true">Layers</h2>
+        <div class="panel-body"></div>
+      </section>
+    </aside>
+  </main>
+  <section class="timeline" id="timeline" aria-label="Frames"></section>
+  <div id="toasts" class="toasts" aria-live="polite"></div>
+  <noscript><p class="noscript">Clockwork Studio needs JavaScript.</p></noscript>
+  <script type="module" src="./js/main.js"></script>
+</body>
+</html>

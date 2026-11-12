@@ -31,8 +31,11 @@ jobs:
 
       - name: Build static bundle
         run: |
-          mkdir -p _site
-          cp -r index.html css js assets .nojekyll _site/
+          mkdir -p _site/art/portraits _site/art/watch
+          cp -r index.html css js assets studio .nojekyll _site/
+          # the Studio's art library also opens the standalone portraits and the watch piece
+          cp art/portraits/*_portrait.png art/portraits/*_portrait_transparent.png _site/art/portraits/
+          cp art/watch/through_the_watch.png _site/art/watch/
           touch _site/.nojekyll
 
       - name: Publish to gh-pages branch
@@ -61,8 +64,11 @@ jobs:
 
       - name: Build static bundle
         run: |
-          mkdir -p _site
-          cp -r index.html css js assets .nojekyll _site/
+          mkdir -p _site/art/portraits _site/art/watch
+          cp -r index.html css js assets studio .nojekyll _site/
+          # the Studio's art library also opens the standalone portraits and the watch piece
+          cp art/portraits/*_portrait.png art/portraits/*_portrait_transparent.png _site/art/portraits/
+          cp art/watch/through_the_watch.png _site/art/watch/
           touch _site/.nojekyll
 
       - uses: actions/upload-pages-artifact@v3
