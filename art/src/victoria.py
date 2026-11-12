@@ -73,7 +73,8 @@ fig.poly([(23, 37), (73, 37), (77, 96), (19, 96)], lambda x, y: hair(x, y, 0.3))
 fig.poly([(32, 50), (64, 50), (66, 80), (30, 80)], lambda x, y: back_hair(x, y))
 
 # bare shoulders, black lace bodice
-fig.poly([(10, 96), (14, 84), (26, 77), (40, 74), (56, 74), (70, 77), (82, 84), (86, 96)],
+from bust import SHOULDERS
+fig.poly(SHOULDERS,
          lambda x, y: SKIN[1] if x > 66 else SKIN[0])
 def lace_col(x, y):
     c = ramp(x, y, 0.6 - (x - 30) / 80, LACE)
@@ -85,17 +86,17 @@ for x in range(30, 67):                      # scalloped neckline
     y = 81 + round(1.5 * abs(math.sin((x - 30) * 0.52))) + (2 if 42 < x < 54 else 0)
     fig.put(x, y, LACE[0]); fig.put(x, y - 1, LACE[2] if x % 3 == 0 else LACE[0])
 neck(fig, SKIN, y1=76)
-for x in range(42, 55):                      # choker and its red gem
+for x in range(44, 53):                      # choker and its red gem
     fig.put(x, 67, LACE[0]); fig.put(x, 68, LACE[2] if x % 2 else LACE[0])
 fig.stamp([".a.", "bcb", "dcd", ".d."], {'a': RED[3], 'b': RED[2], 'c': RED[1], 'd': RED[0]}, 47, 69)
 
 face(fig, SKIN, BLUSH)
 draw_eyes(fig, 'sharp', ('1c1e3a', '3c4270', '6c74a0', 'aab2d8'), lash='0a080c', lid='c49090', pupil='0e0f20')
-for x in range(34, 43): fig.put(x, 36 if x > 36 else 37, HAIR[0])      # straight, serious brows
-for x in range(54, 63): fig.put(x, 36 if x < 60 else 37, HAIR[0])
+for x in range(34, 43): fig.put(x, 35 if x > 36 else 36, HAIR[0])      # straight, serious brows
+for x in range(54, 63): fig.put(x, 35 if x < 60 else 36, HAIR[0])
 nose(fig, SKIN)
-fig.stamp([".bab.", "bcccb", ".bbb."], {'a': RED[0], 'b': RED[2], 'c': RED[1]}, 46, 57)
-fig.put(55, 60, hx('3a1a1a'))                # the mole
+fig.stamp([".bab.", "bcccb", ".bbb."], {'a': RED[0], 'b': RED[2], 'c': RED[1]}, 46, 55)
+fig.put(54, 57, hx('3a1a1a'))                # the mole
 
 
 # blunt fringe: narrow clumps falling almost straight, ending level
@@ -138,6 +139,8 @@ for y in range(36, 50):
     fig.put(26, y, hx('7a7884') if y % 3 else hx('b0aebb'))
 fig.put(26, 50, hx('d0ced8')); fig.put(25, 51, hx('7a7884')); fig.put(27, 51, hx('7a7884'))
 
+from bust import shorten_neck
+shorten_neck(fig)
 res = finish(bg, fig, LINE, rim=lambda x, y: y > 30, rim_col=hx('e07050'), rim_side=-1)
 res.save(f'{OUT}/victoria_portrait.png')
 res.save(f'{OUT}/victoria_portrait_8x.png', 8)

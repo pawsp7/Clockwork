@@ -6,6 +6,12 @@
 
 const met = (s, id) => s.roster.includes(id) || s.cleared.woods;
 
+/** Mark a codex entry as found (campfires, caches and conversations call this). */
+export function unlockLore(s, id) {
+  s.lore ||= { found: [] };
+  if (!s.lore.found.includes(id)) s.lore.found.push(id);
+}
+
 export const CODEX = [
   // ─── People ──────────────────────────────────────────────────────────────
   {
@@ -95,6 +101,39 @@ export const CODEX = [
     ],
   },
   {
+    id: 'hestia_2',
+    cat: 'People',
+    title: 'Hestia, up close',
+    when: (s) => s.cleared.ruins,
+    text: [
+      'She took the cathedral apart one keeper at a time: sat with each of them, so kind, so sorry they looked so tired.',
+      'The ones who said no, she took to see something sacred. Alone.',
+      'In the Ruins she offered Alice a room to look into by herself. There was never anything in it but needles.',
+    ],
+  },
+  {
+    id: 'horace',
+    cat: 'People',
+    title: 'Horace',
+    when: () => false,
+    text: [
+      'The smith. Broad as a door, old as the cathedral’s last bell, and he has not blinked in forty years.',
+      'He was a clock-keeper. Keepers swore never to close their eyes on an hour. Most broke the vow. He didn’t.',
+      'He tells the time to anyone who comes in — “Twenty past” — though nobody in Gehenna could tell you of what.',
+    ],
+  },
+  {
+    id: 'bede',
+    cat: 'People',
+    title: 'Bede',
+    when: () => false,
+    text: [
+      'A milk-carter with a stiff leg. Thirty years up the Milk Road every morning; thirty years of empty crates coming back down.',
+      'He has never drunk the milk. It makes you sleepy, he says. It makes you nice.',
+      'His brother Wat sits third pew from the front, and waves at everyone the same.',
+    ],
+  },
+  {
     id: 'flock',
     cat: 'People',
     title: 'The Flock',
@@ -155,6 +194,16 @@ export const CODEX = [
     text: [
       'Every morning the carts leave Gehenna full and climb the long road past the Manor. Every evening they come back empty.',
       'Nobody follows them. Mitzi did, once, a long way up. She got bored and came home before she saw where it ended.',
+    ],
+  },
+  {
+    id: 'river',
+    cat: 'Places',
+    title: 'The River That Was',
+    when: () => false,
+    text: [
+      'Once a river ran through Gehenna, up past the bend and out under the sky. Charon rowed it.',
+      'Then the flock stopped wanting to go anywhere, and a river nobody uses silts up. They paved it over and called it the Milk Road.',
     ],
   },
   {
@@ -229,6 +278,29 @@ export const CODEX = [
     ],
   },
 
+  {
+    id: 'keepers',
+    cat: 'Faith',
+    title: 'The Clock-Keepers',
+    when: () => false,
+    text: [
+      'The priests of the Old Faith. They rang the cathedral bell every hour, and swore never to close their eyes on one.',
+      'They made a watch for every soul who came down with business unfinished. The cases were made down here. The winding, Horace says, is done from the other end.',
+      'The last bell-ringer stopped for one hour, because someone kind told him he looked tired. He never rang it again.',
+    ],
+  },
+  {
+    id: 'confessions',
+    cat: 'Faith',
+    title: 'Burnt Slips',
+    when: () => false,
+    text: [
+      'Every hour, a keeper wrote a confession on a slip of paper no bigger than a thumbnail, and carried the slips to the Caldera to burn.',
+      'You say it, you own it, you let it go. That was the bargain.',
+      'The Caldera remembers every one. Some of them still ride the heat, one line long.',
+    ],
+  },
+
   // ─── Things ──────────────────────────────────────────────────────────────
   {
     id: 'watch',
@@ -267,6 +339,17 @@ export const CODEX = [
       'Elemental gems set in bracelets let a fighter imbue a strike: Water beats Fire, Fire beats Earth, Earth beats Electric, Electric beats Water.',
       'Using an element leaves you open to whatever beats it, for one breath. Monsters too.',
       'Each imbued strike costs mana, and mana only comes back with rest.',
+    ],
+  },
+  {
+    id: 'thursdays',
+    cat: 'Things',
+    title: 'Thursdays',
+    when: () => false,
+    text: [
+      'There are no Thursdays in Gehenna. Every day is Sunday.',
+      'The sisters came down on a Wednesday night. They never got as far as Thursday.',
+      'Mitzi still asks for it. She doesn’t know why. That is how it goes down here: you forget the thing and keep the shape of it.',
     ],
   },
   {
@@ -309,6 +392,7 @@ export const CODEX = [
     found: 'Abandoned Fort',
     text: [
       'Forty names. Every one crossed out in the same neat hand, with the same note beside it: “gone to mass”.',
+      'Near the top, pressed so hard the pen went through the paper: W. CARTER.',
       'At the bottom: “If you are reading this, the gate held. It always holds. There is nothing left out there to keep out — only us, to keep in.”',
     ],
   },
@@ -394,6 +478,39 @@ export const CHARON_TOPICS = [
     ],
   },
   {
+    id: 'horace',
+    q: 'What’s Horace’s story?',
+    when: (s) => s.chapter >= 2 || !!s.talks?.includes('talk_smith_watch'),
+    a: [
+      'Last of the clock-keepers. Hasn’t blinked since the bell stopped.',
+      'He thinks he’s being punished. He isn’t. He’s waiting. There’s a difference, and one day he’ll notice it.',
+    ],
+  },
+  {
+    id: 'thursdays',
+    q: 'What happened to Thursdays?',
+    when: (s) => s.cleared.woods,
+    a: [
+      'Gone. The Ox made every day Sunday. Fewer days to remember, fewer days to regret.',
+      'Some people still keep the shape of one, though. Ask the little violet one.',
+    ],
+  },
+  {
+    id: 'stop',
+    q: 'Why don’t you stop Hestia?',
+    when: (s) => s.cleared.volcano,
+    a: [
+      'Not my job, dear. I row the boat. I don’t steer it.',
+      'Besides, she never makes anybody kneel. She only asks. That’s the awful part: they all say yes.',
+    ],
+  },
+  {
+    id: 'ferry',
+    q: 'Were you really a ferrywoman?',
+    when: (s) => !!s.lore?.found?.includes('river'),
+    a: ['Still am. Just haven’t had a fare in a while.', 'Yours might be the first in years. Don’t keep me waiting too long.'],
+  },
+  {
     id: 'ox',
     q: 'What is the White Ox?',
     when: (s) => s.cleared.ruins,
@@ -423,10 +540,18 @@ const GOSSIP = [
   [4, 'Somebody saw a big white shape on the Manor roof. Horned. Probably a weathervane.'],
   [4, 'The clock-keepers used to ring a bell every hour. Imagine having to remember things that often.'],
   [5, 'Mass is extra long tonight. Communion, they’re saying. For the surface girl.'],
+  [1, 'Old Horace says it’s “twenty past”. Twenty past WHAT, Horace?'],
+  [1, 'The violet sister asked me if it was Thursday. I said yes, to see what would happen. She hugged me.'],
+  [2, 'Bede’s never touched the milk. Thirty years. Strange fellow. Lovely fellow. Strange.'],
+  [2, 'The surface girl came to mass. Her pocket was ticking the whole way through. Put everyone right off the song.', (s) => s.talks?.includes('talk_church_mass')],
+  [4, 'Saw the red sister in church the other night with a bottle in front of her. Didn’t touch it. Just looked at it.'],
+  [3, 'They say the Fort gate’s open again. What would anyone want out THERE?', (s) => s.cleared.fort],
+  [4, 'I heard a bell yesterday, right in the middle of mass. Now I can’t stop thinking about my mother.', (s) => s.flags.rangBell],
+  [4, 'Hestia came back from the Ruins still smiling. But it was on wrong, somehow.', (s) => s.cleared.ruins],
 ];
 
 export function gossip(state, n = 3) {
-  const pool = GOSSIP.filter(([ch]) => ch <= state.chapter).map(([, t]) => t);
+  const pool = GOSSIP.filter(([ch, , when]) => ch <= state.chapter && (!when || when(state))).map(([, t]) => t);
   const out = [];
   const copy = pool.slice();
   while (out.length < n && copy.length) out.push(copy.splice(Math.floor(Math.random() * copy.length), 1)[0]);

@@ -18,6 +18,7 @@ export function arcs(state) {
 export function computeEnding(state) {
   const a = arcs(state);
   const f = state.flags;
+  const heard = (id) => !!state.talks?.includes(id);
   const cards = [];
 
   if (a.alice === 'ascend') {
@@ -63,8 +64,11 @@ export function computeEnding(state) {
       title: 'Victoria & Mitzi',
       lines: [
         'Victoria sleeps through a whole night. Then another.',
-        'Mitzi learns to cook — badly — and makes her sister breakfast. Victoria eats every bite.',
-        'One morning their room at the Inn is empty, the bed made, a library book on the pillow. Finished.',
+        'Mitzi learns to cook — badly — and makes her sister breakfast. Pancakes. Victoria eats every bite.',
+        'Nobody in Gehenna can say what day it is. Mitzi insists it is a Thursday, and nobody can prove otherwise.',
+        f.victoriaBook
+          ? 'One morning their room at the Inn is empty, the bed made, a damp soldier’s book about pirates on the pillow. Finished.'
+          : 'One morning their room at the Inn is empty, the bed made, a library book on the pillow. Finished.',
         'They went up as two people. Not one person and her shadow.',
       ],
     });
@@ -74,7 +78,7 @@ export function computeEnding(state) {
       title: 'Victoria',
       lines: [
         'Victoria puts down the glass. She lets Mitzi carry her own flask, her own hammer, her own bad days.',
-        'One morning she is simply gone — up, lighter than she has ever been.',
+        f.victoriaBook ? 'She finishes the soldier’s book. Then she simply goes — up, lighter than she has ever been.' : 'One morning she is simply gone — up, lighter than she has ever been.',
         'Mitzi waits by the door for weeks. Nobody comes to do things for her.',
         'Slowly, crossly, she begins to do them herself.',
       ],
@@ -103,12 +107,29 @@ export function computeEnding(state) {
     });
   }
 
+  // the town remembers whoever you listened to
+  if (a.alice !== 'flock') {
+    const town = [];
+    if (f.rangBell) town.push('In the Ruins, the keepers’ bell rings on the hour again. Nobody admits to climbing up there to ring it. Horace’s knees say otherwise.');
+    else if (heard('talk_smith_watch')) town.push('Horace keeps the time in his Smithy, hour after hour, for nobody in particular. He still doesn’t blink.');
+    if (heard('talk_pub_brother')) {
+      town.push('Bede takes his cart up the Milk Road one last time, empty. He doesn’t stop at the Manor. He keeps going, past the bend.');
+      if (f.watHello) town.push('Wat walks beside him, laughing like a dropped crate.');
+    }
+    if (f.rangBell && heard('talk_church_empty')) town.push('Ruth goes home to shut her garden gate.');
+    if (town.length) cards.push({ art: 'gehenna', title: 'Gehenna', lines: [...town, 'Here and there, along the lantern street, people are looking up.'] });
+  }
+
   cards.push({
     art: 'charon',
     title: 'Charon',
     lines:
       a.alice === 'ascend'
-        ? ['Charon flips a coin she took from Alice on the first day.', '“Called it,” she tells nobody. Nobody believes her. She doesn’t mind.']
+        ? [
+            'Charon flips a coin she took from Alice on the first day.',
+            'On the top shelf, the little jar marked ALICE finally has a year on its label. The ink went on first time.',
+            '“Called it,” she tells nobody. Nobody believes her. She doesn’t mind.',
+          ]
         : a.alice === 'linger'
           ? ['Charon finds Alice winding a stopped watch on the Inn steps.', '“Still sightseeing?” She sits down beside her anyway. “I’ve got time. Everyone does, here.”']
           : ['Charon watches the new faithful file into the horned church.', '“Every one of them was going somewhere,” she says, and pockets another coin.'],

@@ -18,6 +18,7 @@ const ART = {
   mitzi_up: { bg: 'inn_night', draw: (ctx, t, p, f) => (ascend(ctx, t, p, [{ id: 'mitzi', x: 540 }], f), standing(ctx, t, [{ id: 'victoria', x: 400 }], f, 0)) },
   sisters_stay: { bg: 'church', draw: (ctx, t, p, f) => standing(ctx, t, [{ id: 'victoria', x: 440 }, { id: 'mitzi', x: 520 }], f, 0.2) },
   charon: { bg: 'clinic', draw: (ctx, t, p, f) => coin(ctx, t, f) },
+  gehenna: { bg: 'town', draw: (ctx, t, p) => lanternLight(ctx, t, p) },
   ox_eyes: { bg: null, draw: (ctx, t, p) => oxEyes(ctx, t, p) },
 };
 
@@ -58,6 +59,15 @@ function coin(ctx, t, flags) {
   ctx.fillStyle = '#e8cc70';
   const w = Math.abs(Math.cos(t / 90)) * 12 + 2;
   ctx.fillRect(500 - w / 2, y, w, 12);
+}
+
+/** The town, slowly brightening, as if somebody had opened a door above it. */
+function lanternLight(ctx, t, p) {
+  const g = ctx.createLinearGradient(0, 0, 0, SH);
+  g.addColorStop(0, `rgba(255,244,220,${0.06 + p * 0.16})`);
+  g.addColorStop(1, 'rgba(255,244,220,0)');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, SW, SH);
 }
 
 function oxEyes(ctx, t, p) {

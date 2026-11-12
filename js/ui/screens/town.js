@@ -12,8 +12,11 @@ import { openNotebook } from '../sheets/notebook.js';
 import { openParty } from '../sheets/party.js';
 import { openSettings } from '../sheets/settings.js';
 import { openSummary } from '../sheets/summary.js';
+import { pendingTalks, talkAt } from '../../story/talks.js';
+import { playTalk } from '../flow.js';
 
 const OPEN = { inn: openInn, pub: openPub, smithy: openSmithy, clinic: openClinic, church: openChurch };
+const PLACE_NAME = { inn: 'the Inn', pub: 'the Pub', church: 'the Church', smithy: 'the Smithy', clinic: 'the Clinic' };
 const BLURB = {
   inn: 'Rest · the story moves on',
   pub: 'Hired blades · odd jobs',
@@ -41,15 +44,66 @@ export const townScreen = {
     this.hover = null;
     this.build();
     if (params.summary) setTimeout(() => openSummary(params.summary), 350);
+    // after a conversation, step inside the place it happened — without focusing a
+    // button, so Enter pressed to finish the dialogue can't buy something by accident
+    else if (params.open && OPEN[params.open]) {
+      setTimeout(() => {
+        if (app.sheet || app.screenName !== 'town') return;
+        OPEN[params.open](() => this.build());
+        setTimeout(() => document.activeElement?.blur?.(), 0);
+      }, 380);
+    }
+  },
+
+  /** Somebody with something to say plays first; otherwise the building opens. */
+  visit(place) {
+    const talk = talkAt(app.state, place);
+    if (talk) return playTalk(talk);
+    OPEN[place]?.(() => this.build());
+  },
+
+  /** Leaving with conversations unheard asks once: they won't wait for you. */
+  leave() {
+    const waiting = pendingTalks(app.state);
+    if (!waiting.length) return app.go('map');
+    const places = [...new Set(waiting.map((t) => PLACE_NAME[t.place]))];
+    const where = places.length > 1 ? `${places.slice(0, -1).join(', ')} and ${places[places.length - 1]}` : places[0];
+    app.openSheet((close) =>
+      h(
+        'div.panel.sheet',
+        { style: { left: '230px', right: '230px', top: '150px', bottom: 'auto' } },
+        h('div.sheet-head', h('div', h('h2', 'Before you go…'), h('div.sub', 'Gehenna moves on while you are away.'))),
+        h(
+          'div.sheet-body',
+          h('p.dim', { style: { fontSize: '16px', lineHeight: 1.5 } }, `Someone at ${where} still wants a word. Once you set out, the chance will pass.`),
+        ),
+        h(
+          'div.sheet-foot',
+          btn('Stay and listen', close, { cls: 'small', key: 'Esc' }),
+          h('div.spacer'),
+          btn('Leave anyway ▸', () => app.go('map'), { cls: 'primary' }),
+        ),
+      ),
+    );
   },
 
   build() {
     const s = app.state;
     app.ui.replaceChildren();
     app.ui.append(townHud('Gehenna'));
-    if (s.objective) app.ui.append(h('div.objective', s.objective));
+    const waiting = pendingTalks(s);
+    if (s.objective) {
+      app.ui.append(
+        h(
+          'div.objective',
+          s.objective,
+          waiting.length ? h('div.objective-talk', `… ${waiting.length === 1 ? 'Someone wants' : `${waiting.length} people want`} a word.`) : null,
+        ),
+      );
+    }
     const sc = sceneDef('town');
     sc.hotspots.forEach((hs, idx) => {
+      const talk = waiting.find((t) => t.place === hs.id);
       const el = h(
         'button.hotspot',
         {
@@ -60,9 +114,10 @@ export const townScreen = {
           onmouseleave: () => (this.hover = null),
           onfocus: () => (this.hover = hs.id),
           onblur: () => (this.hover = null),
-          onclick: () => OPEN[hs.id]?.(() => this.build()),
+          onclick: () => this.visit(hs.id),
         },
-        h('span.tag', h('span.badge', String(idx + 1)), hs.label, h('small', hs.id === 'inn' && s.pendingRest ? 'Rest — the story continues' : BLURB[hs.id])),
+        h('span.tag', h('span.badge', String(idx + 1)), hs.label, h('small', talk ? `… ${talk.who}` : hs.id === 'inn' && s.pendingRest ? 'Rest — the story continues' : BLURB[hs.id])),
+        talk ? h('span.talk-mark', { 'aria-hidden': 'true' }, '…') : null,
       );
       app.ui.append(el);
     });
@@ -86,7 +141,7 @@ export const townScreen = {
         btn('Party', () => openParty(() => this.build()), { cls: 'small', key: 'P' }),
         btn('Notebook', () => openNotebook(), { cls: 'small', key: 'N' }),
         btn('⚙', () => openSettings(), { cls: 'small', title: 'Settings' }),
-        btn('Leave Town ▸', () => app.go('map'), {
+        btn('Leave Town ▸', () => this.leave(), {
           cls: `depart${canLeave && !s.pendingRest ? ' primary' : ''}`,
           key: 'M',
           title: s.pendingRest ? 'Rest at the Inn first — the story is waiting.' : 'Travel beyond the gate',
@@ -136,9 +191,9 @@ export const townScreen = {
     if (n >= 1 && n <= spots.length) {
       e.preventDefault();
       this.hover = spots[n - 1].id;
-      OPEN[spots[n - 1].id]?.(() => this.build());
+      this.visit(spots[n - 1].id);
     } else if (k === 'p') openParty(() => this.build());
     else if (k === 'n') openNotebook();
-    else if (k === 'm') app.go('map');
+    else if (k === 'm') this.leave();
   },
 };

@@ -51,14 +51,14 @@ def horn(side):
     for i in range(120):
         t = i / 119
         x = CX + side * (11 + 21 * math.sin(t * math.pi * 0.62) - 3 * t * t)
-        y = 30 - 27 * t ** 1.15
+        y = 34 - 27 * t ** 1.15
         r = 5.2 * (1 - t) ** 0.8 + 0.5
         shadow.ellipse(x, y, r, r, SHADOW)
 
 SHADOW = hx('0d0a11')
 for side in (-1, 1):
     horn(side)
-shadow.ellipse(CX, 38, 26, 27, SHADOW)
+shadow.ellipse(CX, 42, 26, 27, SHADOW)
 shadow.poly([(8, 96), (16, 70), (80, 70), (88, 96)], SHADOW)
 for y in range(H):
     for x in range(W):
@@ -109,12 +109,13 @@ fig.poly([(23, 36), (74, 36), (77, 96), (19, 96)], lambda x, y: hair_col(x, y, 0
 def dress_col(x, y):
     t = 0.55 - (x - 30) / 90 + 0.12 * math.sin(x * 0.4)
     return ramp(x, y, t * 0.9, DRESS)
-fig.poly([(10, 96), (14, 84), (24, 76), (38, 72), (58, 72), (72, 76), (82, 84), (86, 96)], dress_col)
+from bust import SHOULDERS
+fig.poly(SHOULDERS, dress_col)
 
 # neck
-fig.poly([(42, 56), (54, 56), (55, 74), (41, 74)],
+fig.poly([(44, 56), (52, 56), (53, 70), (55, 74), (41, 74), (43, 70)],
          lambda x, y: SKIN[2] if y < 64 and x > 43 else (SKIN[1] if x > 51 else SKIN[0]))
-for x in range(42, 55):      # shadow under the jaw
+for x in range(43, 54):      # shadow under the jaw
     for y in range(58, 64):
         if y < 62:
             fig.put(x, y, SKIN[2] if y < 60 else SKIN[1])
@@ -126,31 +127,9 @@ for side in (-1, 1):
 fig.poly([(43, 70), (53, 70), (51, 74), (45, 74)], SKIN[1])     # V of the neckline
 fig.line(44, 71, 48, 80, hx('8a7e96')); fig.line(52, 71, 48, 80, hx('8a7e96'))   # cord
 
-# the face
-def face_hw(y):
-    if y < 50:
-        return 14.2
-    t = min(1.0, (y - 50) / 13.5)
-    return max(1.5, 14.2 * (1 - t ** 1.7) ** 0.65)
-
-def skin_col(x, y):
-    t = 0.0
-    hw = face_hw(y)
-    if x - CX > hw - 4:                      # shadow side
-        t = 0.5
-    if x - CX > hw - 2:
-        t = 0.75
-    if y > 58 and abs(x - CX) > hw - 3:
-        t = max(t, 0.45)
-    return SKIN[int(t * 2 + 0.5)]   # flat bands: smooth, no speckle
-
-face = [(CX - face_hw(y), y) for y in range(26, 65)] + [(CX + face_hw(y) + 1, y) for y in range(64, 25, -1)]
-fig.poly(face, skin_col)
-for side in (-1, 1):           # blush
-    for x in range(CX + side * 10 - 2, CX + side * 10 + 3):
-        for y in (52, 53):
-            if not (y == 53 and abs(x - (CX + side * 10)) == 2):
-                fig.put(x, y, BLUSH)
+# the face: the shared round one
+from bust import face as round_face
+round_face(fig, SKIN, BLUSH)
 
 # eyes: calm, heavy-lashed, grey
 draw_eyes(fig, 'lidded', ('3a3644', '5c5868', '8a8696', 'c4c0cc'), lash='16111a', lid='d8aa92', pupil='6a1a28')   # a red pupil: what she is
@@ -158,9 +137,9 @@ draw_eyes(fig, 'lidded', ('3a3644', '5c5868', '8a8696', 'c4c0cc'), lash='16111a'
 for x in range(35, 43): fig.put(x, 37 - (1 if 37 <= x <= 40 else 0), HAIR[1])
 for x in range(54, 62): fig.put(x, 37 - (1 if 56 <= x <= 59 else 0), HAIR[1])
 # nose and mouth
-fig.put(49, 52, SKIN[2]); fig.put(49, 53, SKIN[3]); fig.put(48, 54, SKIN[2])
+fig.put(49, 52, SKIN[2])          # a single-pixel nose
 LIPS = {'a': hx('e88f56'), 'b': hx('f5b07e'), 'c': hx('d06e40')}
-fig.stamp([".bab.", "bacab", ".bbb."], LIPS, 46, 57)
+fig.stamp([".bab.", "bacab", ".bbb."], LIPS, 46, 55)
 
 # bangs: clumps fanning from a part right of centre, swept over the left brow
 from bust import draw_eyes, fringe
@@ -202,6 +181,8 @@ fig.stamp(["..g..", ".gGg.", "gGHGg", ".gGg.", "..g..", "..g..", "..G..", "..g..
 fig.stamp([".g.", "gGg", ".G.", ".g.", ".g."], {'g': GOLD[1], 'G': GOLD[2]}, 47, 80)
 
 # outline the figure against the wall
+from bust import shorten_neck
+shorten_neck(fig)
 fig.outline(HAIR_LINE)
 
 # ── compose ──────────────────────────────────────────────────────────────

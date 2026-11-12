@@ -84,12 +84,13 @@ for y in range(34, H):
 # grey hoodie, frilly white collar, drawstrings
 def hood_col(x, y):
     return ramp(x, y, 0.7 - (x - 24) / 90 + 0.1 * math.sin(x * 0.45 + y * 0.15), HOOD)
-fig.poly([(12, 96), (16, 82), (28, 75), (40, 72), (56, 72), (68, 75), (80, 82), (84, 96)], hood_col)
+from bust import SHOULDERS
+fig.poly(SHOULDERS, hood_col)
 neck(fig, SKIN)
 for i, x in enumerate(range(34, 63, 3)):        # ruffled collar
     fig.ellipse(x + 1, 76 + (1 if i % 2 else 0), 3.2, 3.6,
                 lambda xx, yy, nx, ny: FRILL[0] if ny > 0.4 else (FRILL[1] if nx > 0.2 else FRILL[2]))
-for x in range(42, 55):                         # choker
+for x in range(44, 53):                         # choker
     fig.put(x, 68, BAND[0]); fig.put(x, 69, BAND[1])
 fig.stamp([".a.", "abc", "bcd", ".b."], {'a': GEM[3], 'b': GEM[1], 'c': GEM[2], 'd': GEM[0]}, 47, 69)
 for x0 in (44, 52):                             # drawstrings
@@ -101,11 +102,11 @@ for side in (-1, 1):   # stronger blush: she is always mid-laugh
     for x in range(CX + side * 10 - 3, CX + side * 10 + 4):
         if abs(x - (CX + side * 10)) <= 2: fig.put(x, 51, BLUSH)
 draw_eyes(fig, 'wide', ('3a4060', '5a6488', '8f9cc0', 'cdd6ec'), lash='0e0a10', lid='c79494', pupil='22263a')
-for x in range(35, 42): fig.put(x, 37 - (1 if 36 <= x <= 39 else 0), HAIR[1])
-for x in range(55, 62): fig.put(x, 37 - (1 if 57 <= x <= 60 else 0), HAIR[1])
+for x in range(35, 42): fig.put(x, 35 - (1 if 36 <= x <= 39 else 0), HAIR[1])
+for x in range(55, 62): fig.put(x, 35 - (1 if 57 <= x <= 60 else 0), HAIR[1])
 nose(fig, SKIN)
-fig.stamp(["kkkkkk", "kttttk", ".kmmk.", "..kk.."],
-          {'k': hx('9a4a5a'), 't': hx('ffffff'), 'm': hx('e07a8a')}, 45, 56)   # open, laughing
+fig.stamp(["kkkkk", "kmmmk", ".kmk."],
+          {'k': hx('9a4a5a'), 'm': hx('e07a8a')}, 46, 55)   # open, laughing
 
 
 # full, choppy fringe: many clumps, tips at uneven lengths
@@ -157,6 +158,8 @@ fig.stamp([
     "...kgk.....",
 ], BOW, 64, 30)
 
+from bust import shorten_neck
+shorten_neck(fig)
 res = finish(bg, fig, LINE, rim=lambda x, y: x > CX, rim_col=hx('ffb0d0'), rim_side=1)
 res.save(f'{OUT}/mitzi_portrait.png')
 res.save(f'{OUT}/mitzi_portrait_8x.png', 8)

@@ -103,7 +103,8 @@ fig.poly(bob, lambda x, y: hair_col(x, y, 0.5))
 def coat_col(x, y):
     t = 0.62 - (x - 20) / 110 + 0.1 * math.sin(x * 0.35 + y * 0.1)
     return ramp(x, y, t, COAT)
-fig.poly([(6, 96), (10, 82), (22, 74), (36, 70), (60, 70), (74, 74), (86, 82), (90, 96)], coat_col)
+from bust import SHOULDERS
+fig.poly(SHOULDERS, coat_col)
 fig.poly([(34, 60), (41, 64), (42, 78), (36, 80), (30, 72)], lambda x, y: COAT[3] if x < 37 else COAT[2])
 fig.poly([(62, 60), (55, 64), (54, 78), (60, 80), (66, 72)], lambda x, y: COAT[1] if x > 59 else COAT[2])
 # collar edges: dark seam inside, lamplit rim on top
@@ -115,9 +116,9 @@ for y in (86, 93):
     fig.put(40, y, GOLD[1]); fig.put(56, y, GOLD[1]); fig.put(40, y - 1, GOLD[2]); fig.put(56, y - 1, GOLD[2])
 
 # neck, shirt collar, tie
-fig.poly([(42, 56), (54, 56), (54, 70), (42, 70)],
+fig.poly([(44, 56), (52, 56), (52, 70), (44, 70)],
          lambda x, y: SKIN[2] if y < 63 else (SKIN[1] if x > 50 else SKIN[0]))
-for x in range(42, 55):
+for x in range(43, 54):
     for y in range(56, 63):
         if y < 61:
             fig.put(x, y, SKIN[2] if y < 59 else SKIN[1])
@@ -131,28 +132,9 @@ for y in range(72, 96):    # coat fronts closing over the shirt
     for x in list(range(38, 44 - (96 - y) // 8)) + list(range(53 + (96 - y) // 8, 59)):
         fig.put(x, y, coat_col(x, y))
 
-# the face
-def face_hw(y):
-    if y < 49:
-        return 14.0
-    t = min(1.0, (y - 49) / 13.5)
-    return max(1.5, 14.0 * (1 - t ** 1.6) ** 0.62)
-
-def skin_col(x, y):
-    hw = face_hw(y)
-    t = 0.0
-    if x - CX > hw - 4: t = 0.5
-    if x - CX > hw - 2: t = 0.8
-    if y > 57 and abs(x - CX) > hw - 3: t = max(t, 0.45)
-    return SKIN[int(t * 2 + 0.5)]   # flat bands: smooth, no speckle
-
-face = [(CX - face_hw(y), y) for y in range(26, 64)] + [(CX + face_hw(y) + 1, y) for y in range(63, 25, -1)]
-fig.poly(face, skin_col)
-for side in (-1, 1):
-    for x in range(CX + side * 10 - 2, CX + side * 10 + 3):
-        for y in (51, 52):
-            if not (y == 52 and abs(x - (CX + side * 10)) == 2):
-                fig.put(x, y, BLUSH)
+# the face: the shared round one
+from bust import face as round_face
+round_face(fig, SKIN, BLUSH)
 
 # eyes: green, half-lidded, sly. Her left brow (our right) arched.
 draw_eyes(fig, 'lidded', ('1f4a2a', '3f8a4c', '6cbc6a', 'b8e6a0'), lash='1a100c', lid='c98e74', pupil='10301a', white='f8f2ea')
@@ -162,10 +144,10 @@ fig.put(34, 38, BROW)
 for i, x in enumerate(range(54, 63)):                    # raised brow
     fig.put(x, 36 - (1 if 2 <= i <= 6 else 0) + (1 if i >= 8 else 0), BROW)
 # nose, smirk pulled to one side
-fig.put(49, 51, SKIN[2]); fig.put(49, 52, SKIN[3]); fig.put(48, 53, SKIN[2])
+fig.put(49, 52, SKIN[2])          # a single-pixel nose
 LIP = {'a': hx('b0645a'), 'b': hx('d98c80'), 'c': hx('e9a898')}
-fig.stamp(["a....", ".aaab", "...c."], LIP, 45, 57)
-fig.put(51, 56, hx('c48070'))
+fig.stamp(["a....", ".aaab", "...c."], LIP, 45, 55)
+fig.put(51, 54, hx('c48070'))
 
 # bangs: parted on our left, swept hard across to the right, tousled
 from bust import draw_eyes, fringe
@@ -209,6 +191,8 @@ def coin_col(x, y, nx, ny):
 fig.ellipse(CNX, CNY, 5.5, 5.5, coin_col)
 fig.stamp([".k.", "k.k", ".k."], {'k': GOLD[0]}, CNX - 1, CNY - 1)   # stamped mark
 
+from bust import shorten_neck
+shorten_neck(fig)
 fig.outline(HAIR_LINE)
 
 # ── compose ──────────────────────────────────────────────────────────────

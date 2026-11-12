@@ -6,33 +6,49 @@ W = H = 96
 CX = 48
 
 
-def face_hw(y, top_w=14.2, jaw=44, bottom=63):
-    """Half-width of the face: a round face. The cheeks stay full well below
-    the eyes (a little fuller around the blush), then curve round into a soft
-    chin instead of tapering to a point."""
+# One shoulder line for the whole cast: narrow and softly sloping, so the
+# head and eyes lead (cute anime proportions) and the five portraits match.
+SHOULDERS = [(CX - 30, 96), (CX - 28, 88), (CX - 24, 81), (CX - 17, 76), (CX - 9, 73),
+             (CX + 9, 73), (CX + 17, 76), (CX + 24, 81), (CX + 28, 88), (CX + 30, 96)]
+
+
+def face_hw(y, top_w=14.4, jaw=42, bottom=61):
+    """Half-width of the face: round and a little short, the cute anime way.
+    Full cheeks just below the eyes, then the lower face is close to a half
+    circle, ending in a soft round chin."""
     if y < jaw:
         return top_w
     t = min(1.0, (y - jaw) / (bottom - jaw))
-    fuller = 0.7 * math.sin(min(1.0, t * 1.6) * math.pi)    # chubby cheeks
-    return max(1.5, (top_w + fuller) * (1 - t ** 2.4) ** 0.5)
+    fuller = 0.9 * math.sin(min(1.0, t * 1.5) * math.pi)    # round cheeks
+    return max(1.5, (top_w + fuller) * (1 - t ** 2.0) ** 0.5)
 
 
-def face(fig, SKIN, BLUSH, top=26, bottom=63, blush_y=52):
+def face(fig, SKIN, BLUSH, top=26, bottom=61, blush_y=50):
     """Lit from the upper left, in flat bands: a shadow down the right side and
     under the jaw, a darker line along the jaw, a lit cheek on the left."""
+    def inside(x, y):
+        return top <= y <= bottom and abs(x + 0.5 - CX) <= face_hw(y)
+
     def col(x, y):
         hw = face_hw(y)
         dx = x - CX
         k = 0
-        if dx > hw - 5 or (y > 56 and abs(dx) > hw - 3): k = 1
-        if dx > hw - 2 or (y > 59 and abs(dx) > hw - 1.5): k = 2
-        if y >= bottom - 1: k = max(k, 1)
+        # shadow side: a cel-shaded band that widens toward the jaw, so the
+        # cheek reads as round
+        band = 3.5 + max(0, y - 38) * 0.28
+        if dx > hw - band: k = 1
+        if dx > hw - band * 0.45 and y > 30: k = 2
+        # shadow following the jaw and chin, deeper on the shadow side
+        if y > 48 and not inside(x, y + 3): k = max(k, 1)
+        if y > 50 and not inside(x, y + 1) and dx > -6: k = 2
+        # where the hair meets the face on the lit side
+        if dx < -hw + 1.2 and y < 52: k = max(k, 1)
         return SKIN[k]
     pts = [(CX - face_hw(y), y) for y in range(top, bottom + 1)] + \
           [(CX + face_hw(y) + 1, y) for y in range(bottom, top - 1, -1)]
     fig.poly(pts, col)
     # jawline: one darker pixel along the lower edge on the shadow side
-    for y in range(50, bottom + 1):
+    for y in range(48, bottom + 1):
         x = round(CX + face_hw(y))
         if fig.get(x, y) in SKIN:
             fig.put(x, y, SKIN[3])
@@ -44,48 +60,55 @@ def face(fig, SKIN, BLUSH, top=26, bottom=63, blush_y=52):
             for y in (blush_y, blush_y + 1):
                 if not (y == blush_y + 1 and abs(x - (CX + side * 10)) == 2):
                     fig.put(x, y, BLUSH)
+        fig.put(CX + side * 10 - 1, blush_y, blend(BLUSH, (255, 255, 255), 0.65))   # shine
 
 
 # Eyes, 11 wide x 9 tall, drawn for the viewer's left eye and mirrored.
 # k lash  w white  1-4 iris dark->light  p pupil  h highlight  l lower lid
 EYE_SHAPES = {
-    'wide': [            # open and bright (Alice, Mitzi)
+    'wide': [            # big and bright (Alice, Mitzi)
         "...kkkkkk..",
         ".kkkkkkkkkk",
-        "kk.w11111k.",
-        "...whh122w.",
-        "...wh2p22w.",
-        "...w33p3hw.",
-        "...w34443w.",
-        "....l444l..",
+        "kkk111111k.",
+        ".w1hh1112w.",
+        ".w1hh2222w.",
+        ".w22pp223w.",
+        ".w23pp233w.",
+        ".w2333h33w.",
+        ".w3344433w.",
+        "..w44444w..",
         "...........",
     ],
-    'lidded': [          # heavy lid, half-closed (Hestia, Charon)
+    'lidded': [          # heavy, sleepy lid (Hestia, Charon)
         "...........",
         "...........",
-        "..kkkkkkkk.",
-        "kkkkkkkkkkk",
-        "k..wh1111w.",
-        "...wh2p22w.",
-        "...w33p3hw.",
-        "....l444l..",
+        "...kkkkkk..",
+        ".kkkkkkkkkk",
+        "kkk111111k.",
+        ".w1hh1112w.",
+        ".w2hpp223w.",
+        ".w23pp333w.",
+        ".w3344h33w.",
+        "..w44444w..",
         "...........",
     ],
     'sharp': [           # lined top and bottom (Victoria)
-        "..kkkkkkk..",
-        "kkkkkkkkkkk",
-        "kk.w11111kk",
-        "...whh122w.",
-        "...wh2p22w.",
-        "...w33p3hw.",
-        "...w34443k.",
-        "....k444k..",
-        ".....kkk...",
+        "...kkkkkk..",
+        ".kkkkkkkkkk",
+        "kkk111111kk",
+        ".w1hh1112w.",
+        ".w1hh2222w.",
+        ".w22pp223w.",
+        ".w23pp233w.",
+        ".w2333h33w.",
+        ".w3344433k.",
+        "..k44444k..",
+        "...kkkkk...",
     ],
 }
 
 
-def draw_eyes(fig, shape, iris, lash, lid, y=39, lx=33, rx=53, pupil=None, white='f8f6fb'):
+def draw_eyes(fig, shape, iris, lash, lid, y=38, lx=34, rx=52, pupil=None, white='f8f6fb'):
     """iris: four colours dark->light (hex). Shaded top to bottom, a pupil,
     a big highlight upper left and a small one lower right."""
     from pix import hx as _hx
@@ -97,7 +120,7 @@ def draw_eyes(fig, shape, iris, lash, lid, y=39, lx=33, rx=53, pupil=None, white
     fig.stamp(rows, pal, rx, y, mirror=True)
 
 
-def neck(fig, SKIN, y0=56, y1=74, x0=42, x1=54):
+def neck(fig, SKIN, y0=56, y1=74, x0=44, x1=52):
     fig.poly([(x0, y0), (x1, y0), (x1 + 1, y1), (x0 - 1, y1)],
              lambda x, y: SKIN[1] if x > x1 - 3 else SKIN[0])
     for x in range(x0 - 1, x1 + 2):
@@ -112,7 +135,7 @@ def eyes(fig, rows, pal, y=41, lx=33, rx=53):
 
 
 def nose(fig, SKIN, y=52):
-    fig.put(49, y, SKIN[2]); fig.put(49, y + 1, SKIN[3]); fig.put(48, y + 2, SKIN[2])
+    fig.put(49, y, SKIN[2])          # a cute nose is a single pixel
 
 
 def hair_shader(stops, light_x=-1.0, wave=0.95, diag=0.0):
@@ -141,6 +164,16 @@ def wavy_lock(fig, col, x_top, y_top, y_bot, w_top, w_bot, amp, freq, ph, tilt=0
         w = w_top + (w_bot - w_top) * t
         for x in range(round(cx - w / 2), round(cx + w / 2) + 1):
             fig.put(x, y, col(x, y, ph))
+
+
+def shorten_neck(fig, rows=4, at=62):
+    """Take `rows` rows out of the neck (starting at y=`at`, just under the
+    chin) and move everything above down to close the gap: the head drops
+    onto the shoulders, and nothing else changes shape."""
+    for y in range(at + rows - 1, rows - 1, -1):
+        fig.px[y] = fig.px[y - rows]
+    for y in range(rows):
+        fig.px[y] = [None] * fig.w
 
 
 def finish(bg, fig, outline, rim=None, rim_col=None, rim_side=-1, out=None):

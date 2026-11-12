@@ -3,6 +3,7 @@
  * The runner walks them and yields display steps to the UI:
  *   { type: 'line', speaker, text, mood }   — narration has speaker 'narrator'
  *   { type: 'choice', prompt, options }
+ *   { type: 'card', title, sub }           — a chapter title card; the player continues past it
  *   { type: 'battle', opts }                — UI runs combat, then calls resume()
  *   { type: 'end', then }                   — scene finished; `then` tells the controller where to go
  * Side effects (bg / music / fx / cast) go through hooks so logic stays testable.
@@ -95,6 +96,8 @@ export class StoryRunner {
         this.ended = true;
         this.stack = [];
         return { type: 'battle', opts: typeof cmd.opts === 'function' ? cmd.opts(s) : cmd.opts, after: cmd.after || null };
+      case 'card':
+        return { type: 'card', title: cmd.title, sub: cmd.sub || '' };
       case 'cg':
         this.cg = cmd.v;
         this.hooks.cg?.(cmd.v);
@@ -177,5 +180,6 @@ export const choice = (options, prompt) => ({ k: 'choice', options, prompt });
 export const opt = (text, extra = {}) => ({ text, ...extra });
 export const battle = (opts, after) => ({ k: 'battle', opts, after });
 export const cg = (v) => ({ k: 'cg', v });
+export const card = (title, sub) => ({ k: 'card', title, sub });
 export const goto = (v) => ({ k: 'goto', v });
 export const end = (v) => ({ k: 'end', v });

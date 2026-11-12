@@ -36,7 +36,7 @@ export const trailScreen = {
     const note = app.state.expedition.note;
     app.state.expedition.note = null;
     this.build(note);
-    this.autoTalk();
+    this.autoTalk(note);
   },
 
   exit() {
@@ -48,11 +48,11 @@ export const trailScreen = {
   },
   saveBlockedReason: 'Wait until the party stops walking.',
 
-  /** Conversations on the trail start by themselves. */
-  autoTalk() {
+  /** Conversations on the trail start by themselves — after a moment to read any news. */
+  autoTalk(note) {
     clearTimeout(this.autoTimer);
     const next = peekNext(app.state);
-    if (next?.type === 'story') this.autoTimer = setTimeout(() => this.go(), 900);
+    if (next?.type === 'story') this.autoTimer = setTimeout(() => this.go(), note ? 2800 : 1100);
   },
 
   build(note) {
@@ -73,9 +73,16 @@ export const trailScreen = {
     const info = next ? NODE_INFO[next.type] : null;
     const cost = partyMembers(s).length;
     const costText = !next ? '' : next.type === 'story' ? 'Starting…' : next.type === 'battle' || next.type === 'boss' ? `−${cost} to travel, −${cost} to fight` : `−${cost} supplies to travel`;
+    // between fights, a glimpse of the place instead of a generic line
+    const ambient = d.ambient?.length && (next?.type === 'battle' || next?.type === 'story') ? d.ambient[Math.max(0, s.expedition.node) % d.ambient.length] : null;
     const nextBox = h(
       'div.trail-next',
-      h('div', h('div.label', 'Next'), h('h3', next ? `${info.icon} ${info.label}` : 'The way home'), h('p', note || (next ? info.text || 'The party has something to say.' : ''))),
+      h(
+        'div',
+        h('div.label', 'Next'),
+        h('h3', next ? `${info.icon} ${info.label}` : 'The way home'),
+        note ? h('p', note) : ambient ? h('p.ambient', ambient) : h('p', next ? info.text || 'The party has something to say.' : ''),
+      ),
       h('div.row', btn(next?.type === 'boss' ? 'Face the guardian ▸' : 'Continue ▸', () => this.go(), { cls: 'primary', key: '↵' }), h('span.faint', { style: { fontSize: '13px' } }, costText)),
     );
     const quests = h('ul.trail-quests', h('div.label', { style: { marginBottom: '6px' } }, 'Odd jobs'));
@@ -131,7 +138,7 @@ export const trailScreen = {
       }
       saveGame(s, 'auto');
       this.build(msg);
-      this.autoTalk();
+      this.autoTalk(msg);
       return;
     }
     if (node.type === 'camp') {
@@ -144,7 +151,7 @@ export const trailScreen = {
       }
       saveGame(s, 'auto');
       this.build(note);
-      this.autoTalk();
+      this.autoTalk(note);
       return;
     }
     this.build();
