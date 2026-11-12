@@ -2,7 +2,7 @@
 
 *A dim pixel-art RPG set in Gehenna, the underground afterlife.*
 
-Alice finds an old pocket watch in a drawer of broken things. One evening it opens by itself, and she falls through it into **Gehenna**, a town under a sky of stone where milk is the export, faith is the import, and nobody believes Charon when she says they're all dead. Two sisters (Victoria, who never lets go, and Mitzi, who never has to) walk the road with her. Hestia, keeper of the White Ox gospel, waits at the end of it.
+Alice finds an old pocket watch in a drawer of broken things. One evening it opens by itself, and she falls through it into **Gehenna**, a town under a sky of stone where milk is the export, faith is the import, and nobody believes Charon when she says they're all dead. Two sisters (Victoria, who never lets go, and Mitzi, who never has to) walk the road with her. Hestia, keeper of the White Ox gospel, waits at the end of it. In between, the town has its own stories: Horace, the last clock-keeper, who hasn't blinked in forty years; Bede, who has driven the milk up the long road every morning for thirty, and never once seen who takes it.
 
 ## Play
 
@@ -37,13 +37,15 @@ Everything is self-contained: no build step, no dependencies, fonts are bundled,
 
 **The notebook.** There are 36 creatures, one for every eye/shape/limb combination. They start as shadows. Whatever you see a creature do is written next to every feature you know. When the notes for an enemy's known features agree, the notebook predicts its attack, and the watch shows the prediction. Learn all three features and that species is named on sight forever after.
 
-**Lore.** The Notebook's **Codex** fills in as you travel: people, places, the faith of the White Ox and the Old Faith of the clock, plus pages found in caches. Campfires on the trail start conversations of their own. Ask Charon about the town at her Clinic, and listen to the Pub's gossip.
+**Lore.** The Notebook's **Codex** fills in as you travel: people, places, the faith of the White Ox and the Old Faith of the clock, plus pages found in caches. Campfires and quiet stretches of the trail start conversations of their own, and between fights the trail shows you a glimpse of the place. Ask Charon about the town at her Clinic, and listen to the Pub's gossip, which changes with what you have done.
+
+**Between expeditions.** Each chapter opens with a title card, and every return to town is a full evening, a night at the Inn and a morning before the road calls again. When someone in town has something to say, a **…** hangs over their door; step inside to hear it. These conversations are optional and never change the rules, but each one only lasts until you sleep or set out. They fill the Codex, colour later scenes (Horace's bell, Bede's brother, Mitzi's Thursdays) and add a closing card about the town to the endings that leave it behind.
 
 **Gehenna.** Rest at the **Inn** to recover and let the story move on. Hire mercenaries and take odd jobs at the **Pub**: mingle for new faces, bargain at your peril, and finish a job if you took someone on a free trial. Reforge weapons, buy gems, widen bracelets and craft armour at the **Smithy**. Buy remedies (and unsolicited advice) at Charon's **Clinic**.
 
 ## The road
 
-1. **Prologue**: two thugs, a tutorial in reading the future.
+1. **Prologue**: a drawer of broken things, two thugs, and a tutorial in reading the future.
 2. **Dead Woods**: Mitzi won't fight. How you talk to her decides when she learns to study.
 3. **The Caldera**: Mitzi swings a hammer. Your words set her strength for the rest of the game. Alice's hair doesn't survive.
 4. **Abandoned Fort**: Victoria keeps stepping in front of her sister. Your answers decide whether she keeps doing it, stops, or learns to help.
@@ -69,7 +71,7 @@ Everything can be played with the mouse or with the keyboard alone.
 
 ## Art
 
-The character art for Alice, Mitzi, Victoria and Hestia comes from [`references/Art`](./references/Art), stored at native size in `assets/art`. Alice's portrait and Hestia's sprite are built from those same pixels by re-colouring and patching, and Hestia's expressions come from the frames of her own animation. Charon's portrait is painted in code to match (`js/art/charon.js`), as are the creatures, backdrops and event illustrations. `dev/moods.html` previews every expression.
+The character art for Alice, Mitzi, Victoria and Hestia comes from [`references/Art`](./references/Art), stored at native size in `assets/art`. Alice's portrait and Hestia's sprite are built from those same pixels by re-colouring and patching, and Hestia's expressions come from the frames of her own animation. Charon's portrait is painted in code to match (`js/art/charon.js`), as are the townsfolk's lantern-lit silhouettes (`js/art/portraits.js`), the creatures, backdrops and event illustrations. `dev/moods.html` previews every expression.
 
 ## Development
 
@@ -92,7 +94,7 @@ js/
   core/     rng, procedural audio
   data/     heroes, monsters (36 + bosses), items, dungeons
   game/     pure rules: combat, notebook, expedition, town, story runner, endings
-  story/    the script, every line and branch, and the lore (codex, Charon's answers, gossip)
+  story/    the script, every line and branch; town conversations (talks.js); the lore (codex, Charon's answers, gossip)
   art/      reference-art pipeline, creatures, painted backdrops, event illustrations, effects
   ui/       app shell, screens, sheets
 tests/      node:test suite + a headless driver that can play the whole game

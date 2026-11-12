@@ -46,6 +46,7 @@ export function createState() {
     gems: { fire: 0, water: 0, earth: 0, electric: 0 },
     notebook: { unlocked: false, traits: {}, species: {}, known: {}, fresh: [] },
     lore: { found: [] },
+    talks: [], // town conversations already heard (see story/talks.js)
     quests: { board: [], active: [], completed: 0 },
     flags: {
       shortHair: false,
@@ -65,6 +66,16 @@ export function createState() {
       finalChoice: null,
       metHestia: false,
       seenTownIntro: false,
+      // remembered for callbacks in later conversations (no effect on the rules)
+      toldSun: false, // Alice told Mitzi about the sun
+      toldDrawer: false, // Alice told Victoria about her drawer of broken things
+      showedDrawing: false, // Alice showed Mitzi her childhood drawing
+      mitziCoat: false, // Mitzi put her coat over her sleeping sister
+      mitziTea: false, // Mitzi resolved to learn to make the tea
+      victoriaBook: false, // Victoria took a book from the Fort
+      horaceHope: false, // Alice told Horace he could start again
+      rangBell: false, // Alice rang the keepers' bell in the Ruins
+      watHello: false, // Alice said hello to Wat's name on the roster
     },
     scores: {
       woods: { good: 0, total: 0 },

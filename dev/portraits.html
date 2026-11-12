@@ -1,15 +1,18 @@
 <!doctype html>
 <html><head><meta charset="utf-8"><style>body{margin:0;background:#16121a}canvas{image-rendering:pixelated}</style></head>
-<body><canvas id="c" width="1400" height="820"></canvas>
+<body><canvas id="c" width="1400" height="1090"></canvas>
 <script type="module">
+import { loadArt } from '../js/art/refart.js';
 import { portrait } from '../js/art/portraits.js';
 import { blit } from '../js/art/pixel.js';
+await loadArt('../assets/art/');
 const ctx = document.getElementById('c').getContext('2d');
-ctx.fillStyle = '#2a2230'; ctx.fillRect(0,0,1400,820);
+ctx.fillStyle = '#2a2230'; ctx.fillRect(0,0,1400,1090);
 const list = [
   ['alice', {}, null], ['alice', {}, 'happy'], ['alice', {shortHair:true}, 'shock'], ['alice', {shortHair:true, eyepatch:true}, null], ['alice', {}, 'sad'],
   ['mitzi', {}, null], ['mitzi', {}, 'happy'], ['mitzi', {}, 'sad'], ['victoria', {}, null], ['victoria', {}, 'angry'],
   ['hestia', {}, null], ['hestia', {}, 'happy'], ['hestia', {}, 'angry'], ['charon', {}, null], ['thug', {}, null],
+  ['smith', {}, null], ['carter', {}, null], ['flock', {}, null],
 ];
 list.forEach(([w, f, m], i) => blit(ctx, portrait(w, f, m), 100 + (i % 5) * 270, 260 + Math.floor(i/5)*270, 5));
 </script></body></html>

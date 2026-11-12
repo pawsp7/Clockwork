@@ -27,6 +27,7 @@ import { HEROES, WEAPONS, ARMOURS, ARMOUR_CRAFT } from '../../data/heroes.js';
 import { ELEMENTS, LABEL } from '../../data/constants.js';
 import { playScene } from '../flow.js';
 import { CHARON_TOPICS, charonAnswer, gossip } from '../../story/lore.js';
+import { pendingTalks } from '../../story/talks.js';
 
 function sheet(title, sub, body, { foot, portraitOf, width } = {}) {
   return (close) =>
@@ -65,6 +66,7 @@ export function openInn(onChange) {
   const s = app.state;
   const story = !!s.pendingRest;
   const last = s.pendingRest === 'last_night';
+  const waiting = story ? pendingTalks(s).length : 0;
   app.openSheet(
     sheet(
       'The Inn',
@@ -73,6 +75,7 @@ export function openInn(onChange) {
         h(
           'div.col',
           h('p.dim', { style: { fontSize: '16px', lineHeight: 1.5 } }, story ? (last ? 'Tomorrow is the Manor. Whatever you mean to say, tonight is the night to say it. Make sure you’ve bought what you need first.' : 'Sleep, and Gehenna will move on without asking. Something is waiting for morning.') : 'A night’s sleep restores everyone’s health and mana. Nothing else will change.'),
+          waiting ? h('p.brass', { style: { fontSize: '15px' } }, `… ${waiting === 1 ? 'Someone in town still wants' : `${waiting} people in town still want`} a word tonight. Once you sleep, the chance will pass.`) : null,
           h('div.row', btn(story ? 'Rest for the night' : 'Rest', () => doRest(onChange), { cls: 'primary' })),
         ),
       { width: 520 },
