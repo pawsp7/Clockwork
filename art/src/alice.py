@@ -84,9 +84,10 @@ for y in range(30, H):
 def blouse_col(x, y):
     t = 0.75 - (x - 30) / 100 + 0.12 * math.sin(x * 0.5 + y * 0.2)
     return ramp(x, y, t, BLOUSE)
-fig.poly([(14, 96), (18, 82), (28, 74), (40, 71), (56, 71), (68, 74), (78, 82), (82, 96)], blouse_col)
+from bust import SHOULDERS
+fig.poly(SHOULDERS, blouse_col)
 for side in (-1, 1):   # puffed sleeves
-    fig.ellipse(CX + side * 26, 84, 10, 9, lambda x, y, nx, ny: ramp(x, y, 0.8 - nx * 0.3 - ny * 0.4, BLOUSE))
+    fig.ellipse(CX + side * 23, 86, 7.5, 8, lambda x, y, nx, ny: ramp(x, y, 0.8 - nx * 0.3 - ny * 0.4, BLOUSE))
 neck(fig, SKIN)
 for side in (-1, 1):   # little rounded collar
     fig.ellipse(CX + side * 5, 74, 7, 4, lambda x, y, nx, ny: BLOUSE[0] if ny > 0.5 else BLOUSE[3])
@@ -98,7 +99,7 @@ draw_eyes(fig, 'wide', ('1f5f70', '2f8fa2', '5fc4d2', 'b4f0f4'), lash='3e1c28', 
 for x in range(35, 42): fig.put(x, 36 - (1 if 37 <= x <= 39 else 0), HAIR[1])
 for x in range(55, 62): fig.put(x, 36 - (1 if 57 <= x <= 59 else 0), HAIR[1])
 nose(fig, SKIN)
-fig.stamp([".a.", "aba", ".a."], {'a': hx('c06a6e'), 'b': hx('7a3640')}, 47, 57)   # a small 'oh'
+fig.stamp([".a.", "aba", ".a."], {'a': hx('c06a6e'), 'b': hx('7a3640')}, 47, 55)   # a small 'oh'
 
 
 # fringe: soft clumps from a centre part, curling in toward the face
@@ -150,6 +151,8 @@ for a in range(0, 360, 90):
     fig.put(round(WX + math.cos(math.radians(a)) * 4.6), round(WY + math.sin(math.radians(a)) * 4.6), hx('8a7a60'))
 fig.put(WX, WY - 8, GOLD[2]); fig.put(WX, WY - 9, GOLD[1])
 
+from bust import shorten_neck
+shorten_neck(fig)
 res = finish(bg, fig, LINE, rim=lambda x, y: y > 40, rim_col=hx('ffb070'), rim_side=1)
 # the dial's glow spilling over her blouse
 for y in range(H):
