@@ -71,6 +71,17 @@ Everything can be played with the mouse or with the keyboard alone.
 
 The character art for Alice, Mitzi, Victoria and Hestia comes from [`references/Art`](./references/Art), stored at native size in `assets/art`. Alice's portrait and Hestia's sprite are built from those same pixels by re-colouring and patching, and Hestia's expressions come from the frames of her own animation. Charon's portrait is painted in code to match (`js/art/charon.js`), as are the creatures, backdrops and event illustrations. `dev/moods.html` previews every expression.
 
+## Studio
+
+**Clockwork Studio** is a pixel-art editor for drawing and editing the game's art, in the game's own colours: <https://pawsp7.github.io/Clockwork/studio/>, or <http://localhost:4173/studio/> after `npm start`. Like the game, it is plain ES modules with no build step, and nothing leaves your browser.
+
+- **Tools:** pencil (with pixel-perfect lines), eraser, fill, line (Shift snaps to clean 1:1, 2:1 and 3:1 angles), rectangle, ellipse, dither (Bayer patterns that tile), shade (steps a pixel along the palette's ramp), eyedropper, marquee, magic wand, move and hand. Brushes go up to 32px, square or round, with left/right and top/bottom mirroring.
+- **Layers and frames:** layer opacity, visibility and locking; an animation timeline with per-frame timing, onion skin and a looping preview; tiled preview for seamless tiles.
+- **The game's art:** *File › Open Clockwork art* opens a copy of any sprite, portrait or the watch piece (walk cycles and Hestia's blink open as frames). The preset palettes are taken from the cast's own pixels (`studio/tools/palettes.py`) and sorted into ramps. Opening a scaled-up image, like the 16× files in `references/Art` (animated GIFs included), offers to shrink it back to its real pixels.
+- **Files:** export PNG at any whole-number scale, sprite sheets, animated GIFs and Paint Shop Pro `.psp` files with their layers (the same format as `art/src/to_psp.py`). Palettes load and save as `.gpl`, `.pal` (JASC, Paint Shop Pro's own) and `.hex`. Projects save as `.studio.json`, and open drawings autosave in the browser.
+
+Press **?** in the Studio for every shortcut.
+
 ## Development
 
 **Debug mode.** Open the game with `?debug` in the URL, e.g. <https://pawsp7.github.io/Clockwork/?debug>. Then press **`** (backtick), or use the Esc menu or the title screen, to:
@@ -82,7 +93,7 @@ The setting is remembered in your browser; `?debug=0` turns it off.
 
 
 ```bash
-npm test          # rules, story wiring, and full headless playthroughs (good / bad / random choices)
+npm test          # rules, story wiring, full headless playthroughs, and the Studio's pixel code
 npm run sim       # balance: supplies left per dungeon over 20 seeded runs
 npm run balance   # per-battle rounds and supply loss
 ```
@@ -97,6 +108,9 @@ js/
   ui/       app shell, screens, sheets
 tests/      node:test suite + a headless driver that can play the whole game
 dev/        art preview pages (sprites, portraits, creatures, scenes)
+studio/     Clockwork Studio, the pixel-art editor
+  js/core/  pure pixel code: raster tools, documents, undo, GIF, PSP, palettes (tested under Node)
+  js/ui/    canvas, panels, dialogs, menus
 ```
 
 The game's rules live in `js/game` and never touch the DOM, so the test suite can play the whole story, from the prologue to the White Ox, under Node.
