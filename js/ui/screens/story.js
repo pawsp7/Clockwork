@@ -16,9 +16,14 @@ const NAMES = {
   hestia: ['Hestia', 'var(--hestia)'],
   charon: ['Charon', 'var(--charon)'],
   thug: ['Thug', '#a89a90'],
+  smith: ['Horace', '#c8a878'],
+  carter: ['Bede', '#a8b89a'],
+  flock: ['Parishioner', '#c8c0d4'],
 };
 const SPEED = { slow: 28, normal: 55, fast: 120, instant: 100000 };
-const BLINK_OFFSET = { alice: 0, mitzi: 1300, victoria: 2600, hestia: 700, charon: 1900, thug: 0 };
+const BLINK_OFFSET = { alice: 0, mitzi: 1300, victoria: 2600, hestia: 700, charon: 1900, thug: 0, carter: 3100, flock: 500 };
+/** Horace kept the clock-keepers' vow: he never closes his eyes. */
+const NEVER_BLINKS = new Set(['smith']);
 
 export const storyScreen = {
   enter(params) {
@@ -31,6 +36,7 @@ export const storyScreen = {
     });
     this.bg = this.bg || 'town';
     this.cg = null;
+    this.card = null;
     this.step = null;
     this.speaker = null;
     this.mood = null;
@@ -71,7 +77,9 @@ export const storyScreen = {
     if (this.busy) return;
     const step = this.runner.next();
     this.step = step;
+    this.card = null;
     clear(app.ui);
+    if (step.type === 'card') return this.showCard(step);
     if (step.type === 'line') return this.showLine(step);
     if (step.type === 'choice') return this.showChoice(step);
     if (step.type === 'pause') {
@@ -110,6 +118,27 @@ export const storyScreen = {
       this.feedback = null;
     }
     this.type(text, step.text, box.querySelector('.advance'));
+  },
+
+  /** A chapter title card: a breath between acts. */
+  showCard(step) {
+    this.card = { ...step, t0: performance.now() };
+    this.speaker = null;
+    this.log.push({ who: 'narrator', text: step.sub ? `${step.title} — ${step.sub}` : step.title });
+    audio.sfx('advance');
+    app.ui.append(
+      h(
+        'div.chapter-card',
+        { onclick: () => this.click(), role: 'button', tabindex: 0, 'aria-label': 'Continue' },
+        h('div.cc-rule'),
+        h('div.cc-title', step.title),
+        step.sub ? h('div.cc-sub', step.sub) : null,
+        h('div.cc-rule'),
+        h('div.cc-hint', 'Enter to continue'),
+      ),
+    );
+    clearTimeout(this.autoTimer);
+    if (app.settings.autoAdvance) this.autoTimer = setTimeout(() => !app.sheet && this.step === step && this.advance(), 3200);
   },
 
   tools() {
@@ -173,6 +202,7 @@ export const storyScreen = {
   },
 
   click() {
+    if (this.card && performance.now() - this.card.t0 < 700) return;
     clearTimeout(this.autoTimer);
     if (this.typing) return this.typing.done();
     audio.sfx('advance');
@@ -260,6 +290,11 @@ export const storyScreen = {
   render(ctx, t) {
     const now = performance.now();
     const distort = now < this.distortUntil;
+    if (this.card) {
+      drawScene(ctx, this.bg, t, { dim: 0.78 });
+      vignette(ctx, 0.85);
+      return;
+    }
     if (this.cg) {
       drawCg(ctx, this.cg, t);
       if (distort) this.drawDistort(ctx, now);
@@ -291,7 +326,7 @@ export const storyScreen = {
       if (!who) continue;
       const active = who === this.speaker;
       const mood = active ? this.mood : null;
-      const blink = (t + (BLINK_OFFSET[who] || 0)) % 4200 < 140;
+      const blink = !NEVER_BLINKS.has(who) && (t + (BLINK_OFFSET[who] || 0)) % 4200 < 140;
       const img = portrait(who, flags, mood, blink);
       if (!img) continue;
       const bob = active ? Math.round(Math.sin(t / 500) * 1) * 2 : 0;
@@ -360,7 +395,7 @@ export const storyScreen = {
     }
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
-      if (this.step?.type === 'line') this.click();
+      if (this.step?.type === 'line' || this.step?.type === 'card') this.click();
     } else if (e.key === 'l' || e.key === 'L') {
       this.showLog();
     } else if (e.key === 'a' || e.key === 'A') {

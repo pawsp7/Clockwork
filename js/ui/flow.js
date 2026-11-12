@@ -3,6 +3,7 @@ import { createState, saveGame, loadGame, clone, clearSaves, latestSave, migrate
 import { startExpedition, finishExpedition } from '../game/expedition.js';
 import { refreshQuests, mingle } from '../game/town.js';
 import { computeEnding } from '../game/endings.js';
+import { markTalk } from '../story/talks.js';
 
 /** Game progression: which screen comes next, saves, rewinds. */
 
@@ -34,8 +35,15 @@ export function playScene(id, extra = {}) {
   app.go('story', { scene: id, ...extra });
 }
 
-/** Story scenes end with a destination. */
+/** A conversation in town: play it, then step inside the building it happened in. */
+export function playTalk(talk) {
+  markTalk(app.state, talk.id);
+  playScene(talk.id);
+}
+
+/** Story scenes end with a destination ('town:smithy' returns to town and opens the Smithy). */
 export function onSceneEnd(then) {
+  if (typeof then === 'string' && then.startsWith('town:')) return toTown({ open: then.slice(5) });
   switch (then) {
     case 'town':
       return toTown();
@@ -50,13 +58,13 @@ export function onSceneEnd(then) {
   }
 }
 
-export function toTown() {
+export function toTown(params = {}) {
   const s = app.state;
   s.combat = null;
   if (!s.quests.board.length) refreshQuests(s);
   if (!s.mercPool.length) mingle(s, { free: true });
   saveGame(s, 'auto');
-  app.go('town');
+  app.go('town', params);
 }
 
 export function depart(dungeonId) {

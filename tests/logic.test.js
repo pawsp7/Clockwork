@@ -14,6 +14,8 @@ import { StoryRunner } from '../js/game/story.js';
 import { migrate } from '../js/game/state.js';
 import { codexEntries, CODEX, CHARON_TOPICS } from '../js/story/lore.js';
 import { openCache } from '../js/game/expedition.js';
+import { TALKS, pendingTalks, talkAt, interlude, markTalk } from '../js/story/talks.js';
+import { stageState } from '../js/game/debug.js';
 
 test('36 unique monsters, 9 per dungeon, one of each shape/limb pair', () => {
   assert.equal(MONSTERS.length, 36);
@@ -229,7 +231,10 @@ test('every scene referenced by dungeons exists', () => {
 for (const policy of ['good', 'bad', 'random']) {
   test(`full playthrough reaches an ending (${policy} choices)`, () => {
     seed(policy.length * 101);
-    const { ending, state } = playthrough({ policy, combat: {}, maxRetries: 10 });
+    // the bad run walks straight past everyone in town; the others stop to listen
+    const talks = policy !== 'bad';
+    const { ending, state } = playthrough({ policy, combat: {}, maxRetries: 10, talks });
+    assert.equal(state.talks.length, talks ? TALKS.length : 0, 'town conversations heard');
     assert.ok(ending.cards.length >= 4);
     assert.equal(state.cleared.manor, true);
     assert.equal(state.flags.shortHair, true);
@@ -241,6 +246,10 @@ for (const policy of ['good', 'bad', 'random']) {
       assert.equal(ending.title, 'Clockwork Sky');
       assert.equal(state.flags.victoriaMode, 'assist');
       assert.equal(state.flags.mitziStudy, 'woods');
+      // threads picked up on the way pay off at the end
+      assert.equal(state.flags.rangBell, true);
+      assert.ok(ending.cards.some((c) => c.art === 'gehenna'), 'the town remembers');
+      for (const id of ['horace', 'bede', 'keepers', 'thursdays']) assert.ok(codexEntries(state).some((e) => e.id === id), id);
     }
     if (policy === 'bad') {
       assert.equal(ending.title, 'Flock of the White Ox');
@@ -250,6 +259,76 @@ for (const policy of ['good', 'bad', 'random']) {
     }
   });
 }
+
+test('town conversations: every interlude has some, each ends back in its building', () => {
+  for (let w = 1; w <= 8; w++) assert.ok(TALKS.some((t) => t.window === w), `interlude ${w}`);
+  for (const t of TALKS) {
+    assert.ok(SCENES[t.id], t.id);
+    assert.ok(['inn', 'pub', 'church', 'smithy', 'clinic'].includes(t.place), t.place);
+    const ends = JSON.stringify(SCENES[t.id].filter((c) => c.k === 'end'));
+    assert.match(ends, new RegExp(`town:${t.place}`), `${t.id} returns to the ${t.place}`);
+  }
+  // one conversation per building at a time, so a visit is never ambiguous
+  for (let w = 1; w <= 8; w++) {
+    const places = TALKS.filter((t) => t.window === w).map((t) => t.place);
+    assert.equal(new Set(places).size, places.length, `interlude ${w}`);
+  }
+  // they follow the story: before the woods, then the evening after them
+  const s = stageState('town_1').state;
+  assert.equal(interlude(s), 1);
+  assert.ok(talkAt(s, 'smithy'));
+  markTalk(s, 'talk_smith_watch');
+  assert.equal(talkAt(s, 'smithy'), null, 'heard once');
+  s.cleared.woods = true;
+  assert.equal(interlude(s), 2);
+  assert.ok(pendingTalks(s).every((t) => t.window === 2));
+  s.expedition = {};
+  assert.equal(pendingTalks(s).length, 0, 'nobody talks to you on the road');
+});
+
+test('chapter cards open each act', () => {
+  for (const id of ['prologue', 'woods_enter', 'volcano_enter', 'fort_enter', 'ruins_enter', 'last_night', 'manor']) {
+    const r = new StoryRunner(stageState('last_night').state, SCENES, id);
+    let step = r.next();
+    assert.equal(step.type, 'card', id);
+    assert.ok(step.title, id);
+  }
+});
+
+test('every scene plays through along its first and its last choices', () => {
+  for (const id of Object.keys(SCENES)) {
+    for (const pick of ['first', 'last']) {
+      for (const good of [true, false]) {
+        seed(id.length);
+        const { state } = stageState('last_night', { good });
+        state.roster = ['alice', 'mitzi', 'victoria'];
+        if (good) Object.assign(state.flags, { toldSun: true, toldDrawer: true, showedDrawing: true, mitziCoat: true, mitziTea: true, victoriaBook: true, horaceHope: true, rangBell: true, watHello: true });
+        if (good) state.talks = TALKS.map((t) => t.id);
+        const r = new StoryRunner(state, SCENES, id);
+        let step = r.next();
+        let n = 0;
+        while (step.type !== 'end' && step.type !== 'battle') {
+          assert.ok(++n < 400, `${id} never ends`);
+          if (step.type === 'line') assert.ok(typeof step.text === 'string' && step.text.length, `${id}: empty line`);
+          if (step.type === 'choice') r.choose(step.options[pick === 'first' ? 0 : step.options.length - 1].index);
+          step = r.next();
+        }
+      }
+    }
+  }
+});
+
+test('every line fits its dialogue box', () => {
+  const limits = { narrator: 190, system: 220, choice: 130 };
+  const walk = (list, scene) => {
+    for (const c of list || []) {
+      if (c.k === 'line' && typeof c.text === 'string') assert.ok(c.text.length <= (limits[c.who] || 200), `${scene}: ${c.text}`);
+      if (c.k === 'if') (walk(c.then, scene), walk(c.else, scene));
+      if (c.k === 'choice') for (const o of c.options) (assert.ok(o.text.length <= limits.choice, `${scene}: ${o.text}`), walk(o.then, scene));
+    }
+  };
+  for (const [id, list] of Object.entries(SCENES)) walk(list, id);
+});
 
 test('debug: every stage builds a playable state', async () => {
   const { STAGES, stageState, bossNodeIndex } = await import('../js/game/debug.js');

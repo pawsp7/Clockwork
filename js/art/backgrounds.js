@@ -573,6 +573,54 @@ function clinic(r) {
   });
 }
 
+/** Horace's Smithy: a forge, an anvil, and a wall of clock faces with no hands. */
+function smithy(r) {
+  interior(r, ['#1a1210', '#22160f', '#2a1c12'], ['#33251a', '#281c14', '#1c140e'], 61, (r2) => {
+    // clock faces, every one of them handless
+    const faces = [
+      [40, 62, 13], [78, 50, 9], [108, 70, 15], [146, 52, 10], [176, 74, 12], [70, 98, 11],
+      [130, 108, 9], [206, 50, 8], [232, 82, 13], [36, 120, 9], [196, 116, 10], [262, 56, 9],
+    ];
+    faces.forEach(([x, y, rad], i) => {
+      r2.ellipse(x, y, rad + 2, rad + 2, ['#6a5030', '#4a3a2a', '#7a6040'][i % 3]);
+      r2.ellipse(x, y, rad, rad, ['#d8ccb0', '#c0b49a', '#a89878'][i % 3]);
+      for (let k = 0; k < 12; k++) {
+        const a = (k / 12) * Math.PI * 2;
+        r2.rect(Math.round(x + Math.cos(a) * (rad - 2)), Math.round(y + Math.sin(a) * (rad - 2)), 1, 1, '#3a2a20');
+      }
+      r2.rect(x, y, 1, 1, '#3a2a20');
+    });
+    // tools on a rack
+    r2.rect(296, 44, 70, 3, '#4a3020');
+    [[302, 22], [316, 30], [330, 18], [344, 26], [358, 20]].forEach(([x, len]) => {
+      r2.rect(x, 47, 2, len, '#5a5048');
+      r2.rect(x - 2, 47 + len, 6, 4, '#7a7068');
+    });
+    // the forge: a brick hood over a bed of coals
+    r2.rect(378, 40, 92, 160, '#2a1810');
+    for (let y = 44; y < 196; y += 8) for (let x = 380 + ((y / 8) % 2) * 6; x < 468; x += 12) r2.rect(x, y, 10, 6, '#3a2216');
+    r2.rect(392, 120, 64, 50, '#120a08');
+    r2.rect(396, 150, 56, 20, '#7a2a10');
+    r2.rect(400, 154, 48, 12, '#c8501c');
+    r2.rect(408, 157, 30, 6, '#f0a040');
+    r2.rect(416, 159, 12, 2, '#ffe0a0');
+    r2.rect(388, 112, 72, 8, '#4a2a1a');
+    // the anvil
+    r2.rect(196, 168, 74, 10, '#3a3a3e');
+    r2.rect(186, 164, 20, 6, '#3a3a3e');
+    r2.rect(196, 164, 74, 4, '#5a5a62');
+    r2.rect(214, 178, 36, 14, '#2a2a2e');
+    r2.rect(204, 192, 56, 8, '#3a3a3e');
+    // a half-made hand, gleaming, on the anvil
+    r2.rect(226, 162, 14, 2, '#e8cc80');
+    // a quench barrel
+    r2.rect(316, 160, 34, 40, '#3a2618');
+    r2.rect(316, 160, 34, 3, '#5a3a24');
+    r2.rect(316, 176, 34, 2, '#2a1a10');
+    r2.rect(320, 163, 26, 2, '#1a2a30');
+  });
+}
+
 function mapScene(r) {
   vgrad(r, 0, BH, ['#16121a', '#1c1620', '#221a24']);
   const rnd = hashRng(13);
@@ -612,6 +660,7 @@ const SCENES = {
   pub: { paint: pub, particles: 'dust', lights: [{ x: 170, y: 40, r: 50, color: '#ffc070', flicker: 0.2 }, { x: 395, y: 130, r: 26, color: '#ffc070', flicker: 0.3 }], ground: 214 },
   church: { paint: church, particles: 'embers', lights: [{ x: 240, y: 70, r: 50, color: '#c03030', flicker: 0.3 }], ground: 214 },
   clinic: { paint: clinic, particles: 'dust', lights: [{ x: 300, y: 50, r: 40, color: '#c8e8c8', flicker: 0.15 }], ground: 214 },
+  smithy: { paint: smithy, particles: 'embers', lights: [{ x: 424, y: 158, r: 56, color: '#ff8030', flicker: 0.35 }, { x: 232, y: 162, r: 18, color: '#ffd080', flicker: 0.2 }], ground: 214 },
   map: { paint: mapScene, particles: 'dust', lights: [] },
 };
 

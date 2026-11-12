@@ -18,7 +18,7 @@ export function openSummary(sum) {
           h('span.chip', '◉ ', h('b', String(sum.identified ?? 0)), ' species identified'),
           h('span.chip', '⚒ ', h('b', String(sum.materials ?? 0)), ' materials found'),
         ),
-        h('p.dim', { style: { marginTop: '12px', fontSize: '15px' } }, 'Spend your coin, then rest at the Inn — the story moves on while you sleep.'),
+        h('p.dim', { style: { marginTop: '12px', fontSize: '15px' } }, 'Look for … over the doors: people in town have things to say about where you’ve been. Spend your coin, then rest at the Inn — the story moves on while you sleep.'),
         sum.quests.length ? h('div.section-title', 'Odd jobs') : null,
         sum.quests.map((q) => h('div.shop-row', h('div.info', h('h3', q.text)), q.done ? h('span.good', `Done · ◎ ${q.reward}`) : h('span.faint', 'Not this time'))),
         sum.mercs.length ? h('div.section-title', 'Hired blades') : null,

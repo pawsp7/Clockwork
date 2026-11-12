@@ -22,6 +22,7 @@ import { rest, buyItem, mingle, hire, refreshQuests, acceptQuest, reforge, upgra
 import { computeEnding } from '../js/game/endings.js';
 import { DUNGEON_ORDER } from '../js/data/world.js';
 import { BEATS, COUNTER, RULES } from '../js/data/constants.js';
+import { pendingTalks, markTalk } from '../js/story/talks.js';
 
 export function pickChoice(policy, options, rng = Math.random) {
   if (policy === 'good') {
@@ -216,6 +217,19 @@ function shop(state, ctx) {
   }
 }
 
+/** Listen to everyone in town who has something to say (unless ctx.talks is false). */
+function townTalks(state, ctx, step) {
+  if (ctx.talks === false) return;
+  for (let guard = 0; guard < 12; guard++) {
+    const t = pendingTalks(state)[0];
+    if (!t) return;
+    markTalk(state, t.id);
+    const then = step(t.id);
+    if (then !== `town:${t.place}`) throw new Error(`${t.id} should end in town:${t.place}, got ${then}`);
+  }
+  throw new Error('town conversations never ran out');
+}
+
 export function playthrough(ctx) {
   const state = createState();
   ctx.report = { defeats: [], battles: [], expeditions: [], scenes: [] };
@@ -229,9 +243,11 @@ export function playthrough(ctx) {
 
   for (const dId of DUNGEON_ORDER) {
     if (state.pendingRest) {
+      townTalks(state, ctx, step);
       const r = rest(state);
       if (r.scene) step(r.scene);
     }
+    townTalks(state, ctx, step);
     if (!state.unlocked[dId]) throw new Error(`${dId} not unlocked`);
     shop(state, ctx);
     let attempt = 0;
@@ -292,6 +308,7 @@ export function playthrough(ctx) {
     }
   }
 
+  townTalks(state, ctx, step);
   const r = rest(state);
   if (r.scene !== 'last_night') throw new Error(`expected last_night, got ${r.scene}`);
   shop(state, ctx);
