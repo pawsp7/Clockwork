@@ -1,4 +1,5 @@
 /** Small DOM helpers. */
+import { toast } from './toast.js';
 
 export function h(tag, props = {}, ...kids) {
   const el = document.createElement(tag);
@@ -55,14 +56,44 @@ export function fitCanvas(c, w, h, box) {
   c.style.height = Math.max(1, Math.round(h * s)) + 'px';
 }
 
-export function download(name, data, type) {
+// Inside a claude.ai artifact the page cannot start a download itself; it asks
+// the viewer through the `downloads` capability, which takes only some types.
+const HOST = typeof window !== 'undefined' && window.claude && typeof window.claude.use === 'function' ? window.claude : null;
+const HOSTED_TYPES = new Set(['gif', 'png', 'jpg', 'jpeg', 'webp', 'txt', 'json', 'md']);
+let saver = HOST ? undefined : null; // undefined while the viewer is still answering
+const saverReady = HOST ? HOST.use('downloads').then((d) => (saver = d), () => (saver = null)) : Promise.resolve(null);
+
+/** Can a file of this type be saved here? (Everything can, outside an artifact.) */
+export const canSaveType = (ext) => !HOST || HOSTED_TYPES.has(String(ext).toLowerCase());
+/** False once we know this view cannot save files at all. */
+export const canDownload = () => !HOST || saver !== null;
+
+/** Save a file for the viewer. Resolves true once it is on its way, false if not. */
+export async function download(name, data, type) {
   const blob = data instanceof Blob ? data : new Blob([data], { type });
+  if (HOST) {
+    const d = saver === undefined ? await saverReady : saver;
+    if (!d) {
+      toast('Saving files is not available in this view.', 'warn');
+      return false;
+    }
+    try {
+      await d.save({ filename: name, data: blob });
+      return true;
+    } catch (err) {
+      const code = err && err.code;
+      if (code === 'declined') return false;
+      toast(code === 'rate_limited' ? 'A save is already waiting for your answer.' : `Couldn't save ${name} (${code || 'unknown error'}).`, 'warn');
+      return false;
+    }
+  }
   const url = URL.createObjectURL(blob);
   const a = h('a', { href: url, download: name });
   document.body.appendChild(a);
   a.click();
   a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 4000);
+  return true;
 }
 
 export const isTyping = (el = document.activeElement) =>

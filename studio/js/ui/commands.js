@@ -8,9 +8,11 @@ import { togglePlay, toggleOnion } from './panels.js';
 import { swapColors } from './colorpanel.js';
 import { TOOLS } from './tools.js';
 import { toast } from './toast.js';
+import { canDownload, canSaveType } from './dom.js';
 
 const has = () => !!cur();
 const hasSel = () => !!(cur() && (cur().selection || cur().float));
+const canSave = () => has() && canDownload();
 
 export async function closeTab(i = app.active) {
   const s = app.sessions[i];
@@ -48,12 +50,12 @@ export const COMMANDS = {
   new: { label: 'New…', run: D.newDialog },
   open: { label: 'Open…', keys: ['ctrl+o'], run: () => F.openFile('image/*,.png,.gif,.jpg,.jpeg,.webp,.json,.gpl,.pal,.hex', (files) => D.openImageFiles(files), true) },
   library: { label: 'Open Clockwork art…', run: D.libraryDialog },
-  save: { label: 'Save project', keys: ['ctrl+s'], when: has, run: () => F.saveProject() },
-  export: { label: 'Export…', keys: ['ctrl+e'], when: has, run: () => D.exportDialog() },
-  exportPng: { label: 'Export PNG now', keys: ['ctrl+shift+e'], when: has, run: D.quickExport },
-  exportGif: { label: 'Export animated GIF…', when: has, run: () => D.exportDialog('gif') },
-  exportSheet: { label: 'Export sprite sheet…', when: has, run: () => D.exportDialog('sheet') },
-  exportPsp: { label: 'Export Paint Shop Pro…', when: has, run: () => D.exportDialog('psp') },
+  save: { label: 'Save project', keys: ['ctrl+s'], when: canSave, run: () => F.saveProject() },
+  export: { label: 'Export…', keys: ['ctrl+e'], when: canSave, run: () => D.exportDialog() },
+  exportPng: { label: 'Export PNG now', keys: ['ctrl+shift+e'], when: canSave, run: D.quickExport },
+  exportGif: { label: 'Export animated GIF…', when: canSave, run: () => D.exportDialog('gif') },
+  exportSheet: { label: 'Export sprite sheet…', when: canSave, run: () => D.exportDialog('sheet') },
+  exportPsp: { label: 'Export Paint Shop Pro…', when: () => canSave() && canSaveType('psp'), run: () => D.exportDialog('psp') },
   closeTab: { label: 'Close drawing', when: has, run: () => closeTab() },
 
   // edit

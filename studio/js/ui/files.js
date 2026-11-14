@@ -171,13 +171,14 @@ export async function openFiles(files, { onImage } = {}) {
 
 // ─── saving & exporting ────────────────────────────────────────────────────
 
-export function saveProject(s = cur()) {
+export async function saveProject(s = cur()) {
   if (!s) return;
   E.settle(s);
   const json = JSON.stringify(serialize(s.doc));
   const name = baseName(s) + '.studio.json';
-  download(name, json, 'application/json');
-  s.savedVersion = s.history.version;
+  const version = s.history.version;
+  if (!(await download(name, json, 'application/json'))) return;
+  s.savedVersion = version;
   s.fileName = name;
   emit('session');
   toast(`Saved ${name}`);
@@ -194,18 +195,20 @@ function toBlob(buf, w, hh) {
   return new Promise((res) => c.toBlob(res, 'image/png'));
 }
 
-const markExported = (s) => {
-  // exported pixels count as "kept" for the close-tab warning
-  s.savedVersion = s.history.version;
+/** Exported pixels count as "kept" for the close-tab warning, once the file is saved. */
+async function save(s, name, data, type) {
+  const version = s.history.version;
+  if (!(await download(name, data, type))) return false;
+  s.savedVersion = version;
   emit('session');
-};
+  return true;
+}
 
 export async function exportPng(s = cur(), scale = 1) {
   if (!s) return;
   const buf = framePixels(s, s.frame, scale);
   const suffix = s.doc.frames.length > 1 ? `_f${s.frame + 1}` : '';
-  download(`${baseName(s)}${suffix}${scale > 1 ? `_${scale}x` : ''}.png`, await toBlob(buf, s.doc.w * scale, s.doc.h * scale));
-  markExported(s);
+  return save(s, `${baseName(s)}${suffix}${scale > 1 ? `_${scale}x` : ''}.png`, await toBlob(buf, s.doc.w * scale, s.doc.h * scale));
 }
 
 /** layout: 'row' | 'column' | 'grid' (cols across). */
@@ -233,19 +236,17 @@ export async function exportSheet(s = cur(), { scale = 1, layout = 'row', cols =
     const oy = Math.floor(f / c) * fh;
     for (let y = 0; y < fh; y++) out.set(buf.subarray(y * fw, (y + 1) * fw), (oy + y) * W + ox);
   }
-  download(`${baseName(s)}_sheet${scale > 1 ? `_${scale}x` : ''}.png`, await toBlob(out, W, H));
-  markExported(s);
+  return save(s, `${baseName(s)}_sheet${scale > 1 ? `_${scale}x` : ''}.png`, await toBlob(out, W, H));
 }
 
-export function exportGif(s = cur(), scale = 1) {
+export async function exportGif(s = cur(), scale = 1) {
   if (!s) return;
   const frames = s.doc.frames.map((f, i) => ({ data: framePixels(s, i, scale), delay: f.duration }));
   const bytes = encodeGif(s.doc.w * scale, s.doc.h * scale, frames);
-  download(`${baseName(s)}${scale > 1 ? `_${scale}x` : ''}.gif`, bytes, 'image/gif');
-  markExported(s);
+  return save(s, `${baseName(s)}${scale > 1 ? `_${scale}x` : ''}.gif`, bytes, 'image/gif');
 }
 
-export function exportPsp(s = cur(), { scale = 1, layered = true } = {}) {
+export async function exportPsp(s = cur(), { scale = 1, layered = true } = {}) {
   if (!s) return;
   const { w, h: hh } = s.doc;
   const W = w * scale;
@@ -256,8 +257,7 @@ export function exportPsp(s = cur(), { scale = 1, layered = true } = {}) {
     : [{ name: 'Background', cel: framePixels(s, s.frame, scale), opacity: 1, visible: true }];
   const bytes = encodePsp(W, H, layers, layered ? s.layer : 0);
   const suffix = s.doc.frames.length > 1 ? `_f${s.frame + 1}` : '';
-  download(`${baseName(s)}${suffix}${scale > 1 ? `_${scale}x` : ''}.psp`, bytes, 'application/octet-stream');
-  markExported(s);
+  return save(s, `${baseName(s)}${suffix}${scale > 1 ? `_${scale}x` : ''}.psp`, bytes, 'application/octet-stream');
 }
 
 // ─── autosave ──────────────────────────────────────────────────────────────

@@ -1,6 +1,6 @@
 /** Modal dialogs. */
 import { app, cur, emit, newDocSession } from './state.js';
-import { h, clear, drawCel, fitCanvas } from './dom.js';
+import { h, clear, drawCel, fitCanvas, canSaveType } from './dom.js';
 import { toast } from './toast.js';
 import * as E from './editor.js';
 import * as F from './files.js';
@@ -212,7 +212,8 @@ export function exportDialog(kind) {
     ['gif', 'Animated GIF', 'Every frame, with its timing'],
     ['psp', 'Paint Shop Pro', 'This frame as a .psp'],
     ['project', 'Project', 'Layers, frames and palette (.json)'],
-  ];
+  ].filter(([k]) => k !== 'psp' || canSaveType('psp'));
+  if (!kinds.some(([k]) => k === o.kind)) o.kind = 'png';
   const kindBox = h('div', { class: 'kind-grid', role: 'radiogroup' });
   const scale = h('select', {}, [1, 2, 3, 4, 5, 6, 8, 10, 12, 16].map((k) => h('option', { value: k, selected: k === o.scale }, `${k}×`)));
   const layout = h('select', {}, [['row', 'One row'], ['column', 'One column'], ['grid', 'Grid']].map(([v, l]) => h('option', { value: v, selected: v === o.layout }, l)));
@@ -253,9 +254,9 @@ export function exportDialog(kind) {
         const k = +scale.value;
         if (o.kind === 'png') await F.exportPng(s, k);
         if (o.kind === 'sheet') await F.exportSheet(s, { scale: k, layout: layout.value, cols: +cols.value });
-        if (o.kind === 'gif') F.exportGif(s, k);
-        if (o.kind === 'psp') F.exportPsp(s, { scale: k, layered: layered.checked });
-        if (o.kind === 'project') F.saveProject(s);
+        if (o.kind === 'gif') await F.exportGif(s, k);
+        if (o.kind === 'psp') await F.exportPsp(s, { scale: k, layered: layered.checked });
+        if (o.kind === 'project') await F.saveProject(s);
       },
     },
   ]);

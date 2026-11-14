@@ -208,6 +208,10 @@ if (params.has('fresh')) {
 if (F.restoreAutosave()) {
   toast('Welcome back: your drawings were restored from this browser.');
   emit('session', 'structure', 'pixels', 'selection', 'color', 'tool', 'view');
+} else if (window.STUDIO_START) {
+  // a page can ask to open one of the game's pieces first (the published copy does)
+  const item = D.LIBRARY.flatMap((g) => g.items).find((it) => it[1].endsWith('/' + window.STUDIO_START));
+  (item ? D.openLibraryItem(item) : Promise.resolve()).then(() => app.sessions.length || F.addSession(newDocSession(32, 32, { name: 'untitled' })));
 } else {
   const s = newDocSession(32, 32, { name: 'untitled' });
   F.addSession(s);

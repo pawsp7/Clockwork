@@ -1,6 +1,6 @@
 /** Colour: primary / secondary, an HSV picker with alpha, recent colours, and the palette. */
 import { app, cur, emit, on } from './state.js';
-import { h, clear, download } from './dom.js';
+import { h, clear, download, canSaveType } from './dom.js';
 import { icon } from './icons.js';
 import { toast } from './toast.js';
 import { pack, unpack, toHex, fromHex, rgbToHsv, hsvToRgb, cssColor } from '../core/color.js';
@@ -287,10 +287,14 @@ export function initPalettePanel(root, { openFile }) {
     ]),
     menuButton('File', [
       ['Import (.gpl .pal .hex or an image)…', () => openFile('.gpl,.pal,.hex,.txt,.png,.gif,.jpg,.jpeg,.webp', importPaletteFile)],
-      ['Export GIMP / Aseprite (.gpl)', () => exportPal('gpl')],
-      ['Export Paint Shop Pro (.pal)', () => exportPal('pal')],
-      ['Export hex list (.hex)', () => exportPal('hex')],
-      ['Export as a PNG strip', () => exportPal('png')],
+      ...[
+        ['Export GIMP / Aseprite (.gpl)', 'gpl'],
+        ['Export Paint Shop Pro (.pal)', 'pal'],
+        ['Export hex list (.hex)', 'hex'],
+        ['Export as a PNG strip', 'png'],
+      ]
+        .filter(([, ext]) => canSaveType(ext))
+        .map(([label, ext]) => [label, () => exportPal(ext)]),
       ['Clear the palette', () => setPalette([], 'Palette cleared')],
     ]),
   );
