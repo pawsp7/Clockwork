@@ -31,10 +31,11 @@ jobs:
 
       - name: Build static bundle
         run: |
-          mkdir -p _site/art/portraits _site/art/watch
+          mkdir -p _site/art/portraits _site/art/portraits64 _site/art/watch
           cp -r index.html css js assets studio .nojekyll _site/
           # the Studio's art library also opens the standalone portraits and the watch piece
           cp art/portraits/*_portrait.png art/portraits/*_portrait_transparent.png _site/art/portraits/
+          cp art/portraits64/*_portrait.png _site/art/portraits64/
           cp art/watch/through_the_watch.png _site/art/watch/
           touch _site/.nojekyll
 
@@ -64,10 +65,11 @@ jobs:
 
       - name: Build static bundle
         run: |
-          mkdir -p _site/art/portraits _site/art/watch
+          mkdir -p _site/art/portraits _site/art/portraits64 _site/art/watch
           cp -r index.html css js assets studio .nojekyll _site/
           # the Studio's art library also opens the standalone portraits and the watch piece
           cp art/portraits/*_portrait.png art/portraits/*_portrait_transparent.png _site/art/portraits/
+          cp art/portraits64/*_portrait.png _site/art/portraits64/
           cp art/watch/through_the_watch.png _site/art/watch/
           touch _site/.nojekyll
 

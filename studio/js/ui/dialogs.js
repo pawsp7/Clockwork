@@ -367,6 +367,11 @@ export const LIBRARY = [
     ['Hestia', '../assets/art/hestia_portrait.png'],
     ['Hestia blinking', '../assets/art/hestia_blink.png', 64, 64, 120],
   ] },
+  { group: 'Portraits in the reference style (art/portraits64)', items: [
+    ['Alice', '../art/portraits64/alice_portrait.png'],
+    ['Hestia', '../art/portraits64/hestia_portrait.png'],
+    ['Charon', '../art/portraits64/charon_portrait.png'],
+  ] },
   { group: 'Bust portraits (art/portraits)', items: [
     ['Alice', '../art/portraits/alice_portrait.png'],
     ['Mitzi', '../art/portraits/mitzi_portrait.png'],
